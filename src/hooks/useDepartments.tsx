@@ -45,7 +45,6 @@ export const DepartmentsProvider = ({ children }: { children: ReactNode }) => {
       setDepartments(unwrapApiResponse(data));
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao buscar departamentos');
-      // Error fetching departments
     } finally {
       setLoading(false);
     }
@@ -59,7 +58,6 @@ export const DepartmentsProvider = ({ children }: { children: ReactNode }) => {
       setOrganizationalStructure(unwrapApiResponse(data));
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao buscar estrutura organizacional');
-      // Error fetching organizational structure
     } finally {
       setLoading(false);
     }
@@ -133,7 +131,6 @@ export const DepartmentsProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       const response = await api.department.move(id, data);
       const moved = unwrapApiResponse(response) as IDepartment;
-      // Atualizar tanto a lista quanto a estrutura organizacional
       await Promise.all([fetchDepartments(), fetchOrganizationalStructure()]);
       return moved;
     } catch (err: any) {
@@ -167,7 +164,6 @@ export const DepartmentsProvider = ({ children }: { children: ReactNode }) => {
       const unwrapped = unwrapApiResponse(response);
       return unwrapped;
     } catch (err: any) {
-      // Error adding user to department
       setError(err.response?.data?.message || 'Erro ao adicionar usuário ao departamento');
       throw err;
     } finally {

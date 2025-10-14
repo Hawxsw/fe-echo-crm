@@ -33,14 +33,14 @@ export default function DepartmentForm() {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   useEffect(() => {
-    // Carregar usuários disponíveis
+
     getAllUsers().then((users) => {
-      // Garantir que users seja um array
+
       let usersArray: IUser[] = [];
       if (Array.isArray(users)) {
         usersArray = users;
       } else if (users && typeof users === 'object' && 'data' in users && Array.isArray((users as any).data)) {
-        // Se a resposta estiver em um wrapper { data: [...] }
+
         usersArray = (users as any).data;
       } else {
         usersArray = [];
@@ -65,7 +65,7 @@ export default function DepartmentForm() {
           icon: dept.icon || '🏢',
           position: dept.position,
         });
-        // Se tiver usuários no departamento, adicionar aos selecionados
+
         if (dept.users && dept.users.length > 0) {
           const usersWithRole = dept.users.map(user => ({
             ...user,
@@ -112,7 +112,7 @@ export default function DepartmentForm() {
         toast.success('Departamento criado com sucesso!');
       }
 
-      // Adicionar usuários ao departamento
+
       if (departmentId && selectedUsers.length > 0) {
         
         try {
@@ -131,7 +131,7 @@ export default function DepartmentForm() {
         }
       }
       
-      // Aguardar um pouco antes de navegar para garantir que as operações foram concluídas
+
       setTimeout(() => {
         navigate('/dashboard/organizational-structure');
       }, 1000);
@@ -464,7 +464,7 @@ export default function DepartmentForm() {
                                 checked={(user as any).role === 'colaborador'}
                                 className="w-4 h-4 text-blue-600"
                                 onChange={() => {
-                                  // Atualizar o tipo de usuário
+
                                   const updatedUsers = [...selectedUsers];
                                   updatedUsers[index] = { ...user, role: 'colaborador' };
                                   setSelectedUsers(updatedUsers);
@@ -480,7 +480,7 @@ export default function DepartmentForm() {
                                 checked={(user as any).role === 'supervisor'}
                                 className="w-4 h-4 text-blue-600"
                                 onChange={() => {
-                                  // Atualizar o tipo de usuário
+
                                   const updatedUsers = [...selectedUsers];
                                   updatedUsers[index] = { ...user, role: 'supervisor' };
                                   setSelectedUsers(updatedUsers);

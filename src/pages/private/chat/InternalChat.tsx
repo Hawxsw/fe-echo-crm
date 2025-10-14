@@ -129,11 +129,11 @@ export default function InternalChat() {
   }, [currentUserId, currentChatId, loadChats]);
 
   const handleUserTyping = useCallback((_userId: string, _isTyping: boolean) => {
-    // TODO: Implementar indicador de digitação
+
   }, []);
 
   const handleMessageRead = useCallback((_chatId: string, _userId: string) => {
-    // TODO: Implementar indicador de leitura
+
   }, []);
 
   const { isConnected, joinChat, leaveChat } = useWebSocket({
@@ -255,7 +255,7 @@ export default function InternalChat() {
       try {
         await loadMessages(currentChatId);
       } catch (_reloadError) {
-        // Silent fail
+
       }
     }
   }, [currentChatId, sendMessage, loadMessages]);
@@ -295,7 +295,7 @@ export default function InternalChat() {
   }, [currentChatId]);
 
   const handleReactToMessage = useCallback((_messageId: string, _emoji: string) => {
-    // TODO: Implementar reações
+
   }, []);
 
   const handleReplyToMessage = useCallback((message: IMessage) => {
@@ -321,23 +321,23 @@ export default function InternalChat() {
   }, [createChat]);
 
   const handleViewInfo = useCallback(() => {
-    // TODO: Implementar visualização de informações
+
   }, []);
 
   const handlePin = useCallback(() => {
-    // TODO: Implementar fixar conversa
+
   }, []);
 
   const handleMute = useCallback(() => {
-    // TODO: Implementar silenciar conversa
+
   }, []);
 
   const handleArchive = useCallback(() => {
-    // TODO: Implementar arquivar conversa
+
   }, []);
 
   const handleDelete = useCallback(() => {
-    // TODO: Implementar excluir histórico
+
   }, []);
 
   const currentChat = useMemo(() => 
@@ -532,7 +532,7 @@ export default function InternalChat() {
         replies={[]}
         currentUserId={currentUserId}
         onSendReply={(_content) => {
-          // TODO: Implementar envio de resposta
+
         }}
         onReact={handleReactToMessage}
         onEdit={handleEditMessage}

@@ -432,7 +432,7 @@ export const HierarchicalOrgChart = ({
              style={getNodeStyle()}
              onClick={() => {
                if (node.type === 'ceo') {
-                 // Criar um departamento fictício para mostrar a estrutura completa
+
                  const ceoDepartment = {
                    id: 'ceo-structure',
                    name: 'Estrutura Organizacional',

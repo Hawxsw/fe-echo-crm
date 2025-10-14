@@ -7,10 +7,11 @@ import { UserLayout } from './layouts/UserLayout';
 import { routes } from './helpers';
 import { dashboardRoutes, IRouteConfig } from './config/routes.config';
 
-// Public pages (não lazy loaded pois são iniciais)
+
 import Landing from '@/pages/public/Landing';
 import Login from '@/pages/public/Login';
 import Register from '@/pages/public/Register';
+import Profile from '@/pages/private/Profile';
 
 /**
  * Componente de loading para Suspense
@@ -78,7 +79,7 @@ export const Router = () => {
           <Route element={<PrivateRoute />}>
             {/* User Layout - rotas para usuários comuns */}
             <Route element={<UserLayout />}>
-              <Route path={routes.profile.path} element={<div>Perfil</div>} />
+              <Route path={routes.profile.path} element={<Profile />} />
             </Route>
 
             {/* Dashboard Layout - rotas administrativas */}

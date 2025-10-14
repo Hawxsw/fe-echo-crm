@@ -11,6 +11,11 @@ import {
   ChevronRight,
   Building,
   TrendingUp,
+  User,
+  Settings,
+  BarChart3,
+  HelpCircle,
+  MessageSquareText,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { PERMISSIONS } from '../../constants/permissions';
@@ -87,6 +92,31 @@ export const menuItems: IMenuItem[] = [
     icon: <MessageSquare size={20} />,
     permissions: [PERMISSIONS.whatsapp.read, PERMISSIONS.whatsapp.manage],
   },
+  {
+    title: 'Configurações',
+    path: '/dashboard/settings',
+    icon: <Settings size={20} />,
+  },
+  {
+    title: 'Relatórios',
+    path: '/dashboard/reports',
+    icon: <BarChart3 size={20} />,
+  },
+  {
+    title: 'Suporte',
+    path: '/dashboard/support',
+    icon: <HelpCircle size={20} />,
+  },
+  {
+    title: 'Feedback',
+    path: '/dashboard/feedback',
+    icon: <MessageSquareText size={20} />,
+  },
+  {
+    title: 'Meu Perfil',
+    path: '/profile',
+    icon: <User size={20} />,
+  },
 ];
 
 export const Menu = () => {
@@ -104,6 +134,11 @@ export const Menu = () => {
     if (path === '/dashboard') return location.pathname === '/dashboard';
     if (path === '/dashboard/kanban/sales') return location.pathname === '/dashboard/kanban/sales';
     if (path === '/dashboard/kanban') return location.pathname === '/dashboard/kanban';
+    if (path === '/dashboard/settings') return location.pathname === '/dashboard/settings';
+    if (path === '/dashboard/reports') return location.pathname === '/dashboard/reports';
+    if (path === '/dashboard/support') return location.pathname === '/dashboard/support';
+    if (path === '/dashboard/feedback') return location.pathname === '/dashboard/feedback';
+    if (path === '/profile') return location.pathname === '/profile';
     return location.pathname.startsWith(path);
   };
 

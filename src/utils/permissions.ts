@@ -7,7 +7,7 @@ import { IPermission, PermissionAction, PermissionResource } from '../types/role
 export const parsePermission = (permission: string): IPermission => {
   const [resource, action] = permission.split('.');
   
-  // Mapeia o recurso para o formato do backend
+
   const resourceMap: Record<string, PermissionResource> = {
     user: 'USERS',
     role: 'ROLES',
@@ -16,7 +16,7 @@ export const parsePermission = (permission: string): IPermission => {
     whatsapp: 'WHATSAPP',
   };
 
-  // Mapeia a ação para o formato do backend
+
   const actionMap: Record<string, PermissionAction> = {
     create: 'CREATE',
     read: 'READ',

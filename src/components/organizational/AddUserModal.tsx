@@ -29,9 +29,7 @@ export const AddUserModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Carregar usuários disponíveis quando o modal abrir
       getAllUsers().then((users) => {
-        // Garantir que users seja um array
         let usersArray: IUser[] = [];
         if (Array.isArray(users)) {
           usersArray = users;
@@ -41,7 +39,6 @@ export const AddUserModal = ({
           usersArray = [];
         }
         
-        // Filtrar usuários que não estão em nenhum departamento e não são CEO
         const availableUsersFiltered = usersArray.filter(user => 
           !allDepartmentUsers.includes(user.id) && user.position !== 'CEO'
         );
@@ -68,7 +65,7 @@ export const AddUserModal = ({
 
       const roleText = selectedRole === 'supervisor' ? 'Supervisor' : 'Colaborador';
       toast.success(`${roleText} adicionado com sucesso!`);
-      onUserAdded(); // Atualizar a lista de usuários
+      onUserAdded();
     } catch (error) {
       console.error('Erro ao adicionar usuário:', error);
       toast.error('Erro ao adicionar colaborador');
@@ -94,7 +91,6 @@ export const AddUserModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Seleção de função */}
         <div className="px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium text-slate-700">Função padrão:</span>

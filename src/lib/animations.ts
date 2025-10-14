@@ -1,4 +1,4 @@
-// Configurações de animações reutilizáveis para Framer Motion
+
 
 export const fadeIn = {
   initial: { opacity: 0 },
@@ -36,7 +36,7 @@ export const slideInLeft = {
   exit: { opacity: 0, x: 20 },
 };
 
-// Transições suaves
+
 export const smoothTransition = {
   type: 'spring',
   stiffness: 300,
@@ -55,7 +55,7 @@ export const slowSpring = {
   damping: 25,
 };
 
-// Animações de lista (stagger)
+
 export const listContainer = {
   initial: {},
   animate: {
@@ -71,7 +71,7 @@ export const listItem = {
   exit: { opacity: 0, y: -10 },
 };
 
-// Animações de hover
+
 export const hoverScale = {
   whileHover: { scale: 1.05 },
   whileTap: { scale: 0.95 },
@@ -84,7 +84,7 @@ export const hoverGlow = {
   },
 };
 
-// Animações de pulso
+
 export const pulse = {
   animate: {
     scale: [1, 1.05, 1],
@@ -96,7 +96,7 @@ export const pulse = {
   },
 };
 
-// Animações de rotação
+
 export const rotate = {
   animate: {
     rotate: [0, 360],
@@ -108,7 +108,7 @@ export const rotate = {
   },
 };
 
-// Animação de digitando (typing indicator)
+
 export const typingDot = (delay: number = 0) => ({
   animate: {
     y: [0, -8, 0],
@@ -120,7 +120,7 @@ export const typingDot = (delay: number = 0) => ({
   },
 });
 
-// Animação de notificação
+
 export const notificationBounce = {
   initial: { scale: 0, opacity: 0 },
   animate: {
@@ -137,7 +137,7 @@ export const notificationBounce = {
   },
 };
 
-// Animação de badge
+
 export const badgePing = {
   animate: {
     scale: [1, 1.2, 1],

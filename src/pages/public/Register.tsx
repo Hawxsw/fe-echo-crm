@@ -55,7 +55,7 @@ export default function Register() {
     [registerUser, navigate],
   );
 
-  // Não renderiza o formulário se já estiver autenticado
+
   if (currentUser && token) {
     return null;
   }

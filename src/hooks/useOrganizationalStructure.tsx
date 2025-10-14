@@ -9,7 +9,6 @@ export const useOrganizationalStructure = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Buscar estrutura organizacional completa
   const getOrganizationalStructure = useCallback(async () => {
     try {
       setLoading(true);
@@ -25,7 +24,6 @@ export const useOrganizationalStructure = () => {
     }
   }, [api]);
 
-  // Criar departamento
   const createDepartment = useCallback(async (departmentData: ICreateDepartment) => {
     try {
       setLoading(true);
@@ -33,7 +31,6 @@ export const useOrganizationalStructure = () => {
       const response = await api.department.create(departmentData);
       const newDepartment = unwrapApiResponse(response);
       
-      // Recarregar estrutura organizacional para refletir mudanças
       await getOrganizationalStructure();
       
       return newDepartment;
@@ -46,7 +43,6 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Atualizar departamento
   const updateDepartment = useCallback(async (id: string, departmentData: IUpdateDepartment) => {
     try {
       setLoading(true);
@@ -54,7 +50,6 @@ export const useOrganizationalStructure = () => {
       const response = await api.department.update(id, departmentData);
       const updated = unwrapApiResponse(response);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
       
       return updated;
@@ -67,14 +62,12 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Excluir departamento
   const deleteDepartment = useCallback(async (id: string) => {
     try {
       setLoading(true);
       setError(null);
       await api.department.delete(id);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao excluir departamento');
@@ -85,7 +78,6 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Adicionar usuário ao departamento
   const addUserToDepartment = useCallback(async (data: IAddUserToDepartment) => {
     try {
       setLoading(true);
@@ -93,7 +85,6 @@ export const useOrganizationalStructure = () => {
       const response = await api.department.addUser(data);
       const result = unwrapApiResponse(response);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
       
       return result;
@@ -106,14 +97,12 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Remover usuário do departamento
   const removeUserFromDepartment = useCallback(async (departmentId: string, userId: string) => {
     try {
       setLoading(true);
       setError(null);
       await api.department.removeUser(departmentId, userId);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao remover usuário');
@@ -124,7 +113,6 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Definir chefe do departamento
   const setDepartmentHead = useCallback(async (departmentId: string, userId: string) => {
     try {
       setLoading(true);
@@ -132,7 +120,6 @@ export const useOrganizationalStructure = () => {
       const response = await api.department.setDepartmentHead(departmentId, userId);
       const result = unwrapApiResponse(response);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
       
       return result;
@@ -145,7 +132,6 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Mover departamento
   const moveDepartment = useCallback(async (id: string, newParentId: string | null, newPosition?: number) => {
     try {
       setLoading(true);
@@ -153,7 +139,6 @@ export const useOrganizationalStructure = () => {
       const response = await api.department.move(id, { newParentId, newPosition });
       const moved = unwrapApiResponse(response);
       
-      // Recarregar estrutura organizacional
       await getOrganizationalStructure();
       
       return moved;
@@ -166,15 +151,12 @@ export const useOrganizationalStructure = () => {
     }
   }, [api, getOrganizationalStructure]);
 
-  // Manter compatibilidade com código antigo
   const updateUser = useCallback(async (_userId: string, _userData: any) => {
     console.warn('updateUser is deprecated - use users service directly');
-    // Implementação vazia para compatibilidade
   }, []);
 
   const deleteUser = useCallback(async (_userId: string) => {
     console.warn('deleteUser is deprecated - use users service directly');
-    // Implementação vazia para compatibilidade
   }, []);
 
   return {
@@ -189,7 +171,6 @@ export const useOrganizationalStructure = () => {
     removeUserFromDepartment,
     setDepartmentHead,
     moveDepartment,
-    // Deprecated - mantidos para compatibilidade
     updateUser,
     deleteUser,
   };

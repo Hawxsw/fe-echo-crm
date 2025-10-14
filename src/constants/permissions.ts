@@ -47,35 +47,35 @@ export const PERMISSIONS = {
 };
 
 export const PERMISSION_TRANSLATIONS: Record<string, string> = {
-  // User permissions
+
   [PERMISSIONS.user.create]: 'Criar usuário',
   [PERMISSIONS.user.read]: 'Visualizar usuário',
   [PERMISSIONS.user.update]: 'Atualizar usuário',
   [PERMISSIONS.user.delete]: 'Excluir usuário',
   [PERMISSIONS.user.manage]: 'Gerenciar usuários',
 
-  // Role permissions
+
   [PERMISSIONS.role.create]: 'Criar função',
   [PERMISSIONS.role.read]: 'Visualizar função',
   [PERMISSIONS.role.update]: 'Atualizar função',
   [PERMISSIONS.role.delete]: 'Excluir função',
   [PERMISSIONS.role.manage]: 'Gerenciar funções',
 
-  // Chat permissions
+
   [PERMISSIONS.chat.create]: 'Criar chat',
   [PERMISSIONS.chat.read]: 'Visualizar chat',
   [PERMISSIONS.chat.update]: 'Atualizar chat',
   [PERMISSIONS.chat.delete]: 'Excluir chat',
   [PERMISSIONS.chat.manage]: 'Gerenciar chats',
 
-  // Kanban permissions
+
   [PERMISSIONS.kanban.create]: 'Criar board Kanban',
   [PERMISSIONS.kanban.read]: 'Visualizar board Kanban',
   [PERMISSIONS.kanban.update]: 'Atualizar board Kanban',
   [PERMISSIONS.kanban.delete]: 'Excluir board Kanban',
   [PERMISSIONS.kanban.manage]: 'Gerenciar boards Kanban',
 
-  // WhatsApp permissions
+
   [PERMISSIONS.whatsapp.create]: 'Criar conversa WhatsApp',
   [PERMISSIONS.whatsapp.read]: 'Visualizar conversa WhatsApp',
   [PERMISSIONS.whatsapp.update]: 'Atualizar conversa WhatsApp',

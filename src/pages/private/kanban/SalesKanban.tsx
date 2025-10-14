@@ -78,12 +78,12 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/toaster';
 
-// =============== Funções de Formatação e Validação ===============
+
 const formatPhone = (value: string) => {
-  // Remove tudo que não é dígito
+
   const numbers = value.replace(/\D/g, '');
   
-  // Aplica máscara (11) 99999-9999
+
   if (numbers.length <= 2) {
     return numbers;
   } else if (numbers.length <= 7) {
@@ -94,10 +94,10 @@ const formatPhone = (value: string) => {
 };
 
 const formatCurrency = (value: string) => {
-  // Remove tudo que não é dígito
+
   const numbers = value.replace(/\D/g, '');
   
-  // Converte para número e formata
+
   const numericValue = parseFloat(numbers) / 100;
   
   return new Intl.NumberFormat('pt-BR', {
@@ -108,7 +108,7 @@ const formatCurrency = (value: string) => {
 };
 
 const formatEmail = (value: string) => {
-  // Remove espaços e converte para lowercase
+
   return value.trim().toLowerCase();
 };
 
@@ -122,7 +122,7 @@ const validatePhone = (phone: string) => {
   return phoneNumbers.length >= 10 && phoneNumbers.length <= 11;
 };
 
-// =============== Sales Card Types ===============
+
 interface ISalesCard {
   id: string;
   title: string;
@@ -158,7 +158,7 @@ interface ICreateSalesCard {
   expectedCloseDate?: string;
 }
 
-// =============== Sales Column Types ===============
+
 interface ISalesColumn {
   id: string;
   title: string;
@@ -167,7 +167,7 @@ interface ISalesColumn {
   cards: ISalesCard[];
 }
 
-// =============== Draggable Sales Card ===============
+
 interface DraggableSalesCardProps {
   card: ISalesCard;
   onDelete: (cardId: string) => void;
@@ -329,7 +329,7 @@ const DraggableSalesCard = ({ card, onDelete, onOpenActivity }: DraggableSalesCa
   );
 };
 
-// =============== Sortable Sales Column ===============
+
 interface SortableSalesColumnProps {
   column: ISalesColumn;
   onAddCard: (stage: string, cardData: ICreateSalesCard) => void;
@@ -555,7 +555,7 @@ const SortableSalesColumn = ({ column, onAddCard, onDeleteCard, onOpenActivity }
   );
 };
 
-// =============== Main Sales Kanban Component ===============
+
 export default function SalesKanban() {
   const api = useApi();
   const [loading, setLoading] = useState(true);
@@ -564,7 +564,7 @@ export default function SalesKanban() {
 
   const [activeCard, setActiveCard] = useState<ISalesCard | null>(null);
   
-  // Estados para os modais
+
   const [showNewColumnModal, setShowNewColumnModal] = useState(false);
   const [showNewOpportunityModal, setShowNewOpportunityModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -604,7 +604,7 @@ export default function SalesKanban() {
     updatedAt: '',
   });
 
-  // Estados para atividades
+
   const [activities, setActivities] = useState<Array<{
     id: string;
     type: 'call' | 'email' | 'meeting' | 'task' | 'note';
@@ -627,7 +627,7 @@ export default function SalesKanban() {
     scheduledTime: '',
   });
 
-  // Estados para comentários
+
   const [comments, setComments] = useState<Array<{
     id: string;
     content: string;
@@ -638,21 +638,21 @@ export default function SalesKanban() {
   
   const [newComment, setNewComment] = useState('');
 
-  // Carregar pipeline e dados da API
+
   useEffect(() => {
     const loadPipeline = async () => {
       try {
         setLoading(true);
         let pipelines = await api.sales.getAllPipelines();
         
-        // Se não existir nenhum pipeline, criar um padrão
+
         if (!pipelines || pipelines.length === 0) {
           const defaultPipeline = await api.sales.createPipeline({
             name: 'Pipeline de Vendas',
             description: 'Pipeline padrão para gerenciamento de oportunidades de vendas',
           });
           
-          // Criar stages padrão
+
           const defaultStages = [
             { name: 'Leads', color: '#3B82F6', position: 0 },
             { name: 'Qualificados', color: '#10B981', position: 1 },
@@ -666,7 +666,7 @@ export default function SalesKanban() {
             await api.sales.createStage(defaultPipeline.id, stageData);
           }
 
-          // Recarregar pipelines após criar
+
           pipelines = await api.sales.getAllPipelines();
         }
         
@@ -674,7 +674,7 @@ export default function SalesKanban() {
           const pipeline = pipelines[0]; // Pega o primeiro pipeline
           setPipelineId(pipeline.id);
           
-          // Converter stages do backend para o formato do frontend
+
           const convertedColumns: ISalesColumn[] = pipeline.stages.map((stage) => ({
             id: stage.id,
             title: stage.name,
@@ -696,9 +696,9 @@ export default function SalesKanban() {
     loadPipeline();
   }, []);
 
-  // Função auxiliar para converter ISalesOpportunity para ISalesCard
+
   const convertOpportunityToCard = (opportunity: ISalesOpportunity): ISalesCard => {
-    // Mapear prioridades do backend (uppercase) para frontend (lowercase)
+
     const priorityMap: Record<string, 'baixa' | 'media' | 'alta' | 'urgente'> = {
       'LOW': 'baixa',
       'MEDIUM': 'media',
@@ -752,7 +752,7 @@ export default function SalesKanban() {
     const activeCardId = active.id as string;
     const overStageId = over.id as string;
 
-    // Se está sendo movido para a mesma coluna, não faz nada
+
     const currentColumn = columns.find(col => col.cards.some(c => c.id === activeCardId));
     if (currentColumn?.id === overStageId) {
       setActiveCard(null);
@@ -760,7 +760,7 @@ export default function SalesKanban() {
     }
 
     try {
-      // Update otimista na UI
+
       const updatedCard = { ...activeCard, stage: overStageId as any };
       
       setColumns(prevColumns => 
@@ -778,7 +778,7 @@ export default function SalesKanban() {
         )
       );
 
-      // Chamar API para mover a oportunidade
+
       await api.sales.moveOpportunity(activeCardId, { stageId: overStageId });
       
       toast.success('Oportunidade movida com sucesso!');
@@ -786,7 +786,7 @@ export default function SalesKanban() {
       console.error('Erro ao mover oportunidade:', error);
       toast.error('Erro ao mover oportunidade');
       
-      // Reverter em caso de erro - recarregar dados
+
       const pipelines = await api.sales.getAllPipelines();
       if (pipelines && pipelines.length > 0) {
         const pipeline = pipelines[0];
@@ -814,7 +814,7 @@ export default function SalesKanban() {
 
   const handleAddCard = async (stage: string, cardData: ICreateSalesCard) => {
     try {
-      // Validações de formato
+
       if (cardData.email && !validateEmail(cardData.email)) {
         toast.error('Email inválido');
         return;
@@ -825,14 +825,14 @@ export default function SalesKanban() {
         return;
       }
 
-      // Encontrar o stageId correto
+
       const column = columns.find(col => col.stage === stage);
       if (!column) {
         toast.error('Estágio não encontrado');
         return;
       }
 
-      // Mapear prioridades do frontend (lowercase) para backend (uppercase)
+
       const priorityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'> = {
         'baixa': 'LOW',
         'media': 'MEDIUM',
@@ -840,7 +840,7 @@ export default function SalesKanban() {
         'urgente': 'URGENT',
       };
 
-      // Criar oportunidade via API
+
       const opportunity = await api.sales.createOpportunity({
         title: cardData.title,
         description: cardData.description,
@@ -854,7 +854,7 @@ export default function SalesKanban() {
         assignedToId: cardData.assignedTo,
       });
 
-      // Converter e adicionar na UI
+
       const newCard = convertOpportunityToCard(opportunity);
       newCard.stage = stage as any;
 
@@ -874,7 +874,7 @@ export default function SalesKanban() {
   };
 
   const handleDeleteCard = (cardId: string) => {
-    // Encontrar o card para obter o título
+
     let cardTitle = 'Oportunidade';
     if (columns) {
       for (const column of columns) {
@@ -894,10 +894,10 @@ export default function SalesKanban() {
     if (!cardToDelete) return;
 
     try {
-      // Deletar via API
+
       await api.sales.deleteOpportunity(cardToDelete.id);
 
-      // Remover da UI
+
       setColumns(prevColumns =>
         prevColumns.map(column => ({
           ...column,
@@ -936,7 +936,7 @@ export default function SalesKanban() {
       return;
     }
 
-    // Validações de formato
+
     if (editOpportunityForm.email && !validateEmail(editOpportunityForm.email)) {
       toast.error('Email inválido');
       return;
@@ -948,14 +948,14 @@ export default function SalesKanban() {
     }
 
     try {
-      // Encontrar o stageId correto
+
       const targetColumn = columns.find(col => col.stage === editOpportunityForm.stage);
       if (!targetColumn) {
         toast.error('Estágio não encontrado');
         return;
       }
 
-      // Mapear prioridades do frontend para backend
+
       const priorityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'> = {
         'baixa': 'LOW',
         'media': 'MEDIUM',
@@ -963,7 +963,7 @@ export default function SalesKanban() {
         'urgente': 'URGENT',
       };
 
-      // Atualizar via API
+
       const updatedOpportunity = await api.sales.updateOpportunity(editOpportunityForm.id, {
         title: editOpportunityForm.title,
         description: editOpportunityForm.description,
@@ -977,11 +977,11 @@ export default function SalesKanban() {
         assignedToId: editOpportunityForm.assignedTo?.id,
       });
 
-      // Converter e atualizar na UI
+
       const updatedCard = convertOpportunityToCard(updatedOpportunity);
       updatedCard.stage = editOpportunityForm.stage;
 
-      // Remover da coluna antiga
+
       setColumns(prev =>
         prev.map(column => ({
           ...column,
@@ -989,7 +989,7 @@ export default function SalesKanban() {
         }))
       );
 
-      // Adicionar na coluna correta
+
       setColumns(prev =>
         prev.map(column =>
           column.stage === editOpportunityForm.stage
@@ -1006,7 +1006,7 @@ export default function SalesKanban() {
     }
   };
 
-  // Funções para os modais
+
   const handleCreateColumn = async () => {
     if (!newColumnForm.name.trim()) {
       toast.error('Digite um nome para a coluna');
@@ -1019,14 +1019,14 @@ export default function SalesKanban() {
     }
 
     try {
-      // Criar stage via API
+
       const newStage = await api.sales.createStage(pipelineId, {
         name: newColumnForm.name,
         position: columns.length,
         color: newColumnForm.color,
       });
 
-      // Adicionar na UI
+
       const newColumn: ISalesColumn = {
         id: newStage.id,
         title: newStage.name,
@@ -1045,7 +1045,7 @@ export default function SalesKanban() {
     }
   };
 
-  // Funções para atividades
+
   const handleCreateActivity = () => {
     if (!newActivityForm.title.trim() || !newActivityForm.scheduledDate || !newActivityForm.scheduledTime) {
       toast.error('Preencha pelo menos o título, data e horário');
@@ -1091,7 +1091,7 @@ export default function SalesKanban() {
     toast.success('Atividade marcada como concluída!');
   };
 
-  // Funções para comentários
+
   const handleAddComment = () => {
     if (!newComment.trim()) {
       toast.error('Digite um comentário');
@@ -1151,7 +1151,7 @@ export default function SalesKanban() {
       return;
     }
 
-    // Validações de formato
+
     if (newOpportunityForm.email && !validateEmail(newOpportunityForm.email)) {
       toast.error('Email inválido');
       return;
@@ -1163,14 +1163,14 @@ export default function SalesKanban() {
     }
 
     try {
-      // Encontrar o stageId correto
+
       const column = columns.find(col => col.stage === newOpportunityForm.stage);
       if (!column) {
         toast.error('Estágio não encontrado');
         return;
       }
 
-      // Mapear prioridades do frontend para backend
+
       const priorityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'> = {
         'baixa': 'LOW',
         'media': 'MEDIUM',
@@ -1178,7 +1178,7 @@ export default function SalesKanban() {
         'urgente': 'URGENT',
       };
 
-      // Criar via API
+
       const opportunity = await api.sales.createOpportunity({
         title: newOpportunityForm.title,
         description: newOpportunityForm.description,
@@ -1192,7 +1192,7 @@ export default function SalesKanban() {
         assignedToId: newOpportunityForm.assignedTo,
       });
 
-      // Converter e adicionar na UI
+
       const newCard = convertOpportunityToCard(opportunity);
       newCard.stage = newOpportunityForm.stage;
 
@@ -1236,7 +1236,7 @@ export default function SalesKanban() {
     { name: 'Teal', value: '#14B8A6', class: 'bg-teal-500' },
   ];
 
-  // Loading state
+
   if (loading) {
   return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 -m-6 p-6 flex items-center justify-center">

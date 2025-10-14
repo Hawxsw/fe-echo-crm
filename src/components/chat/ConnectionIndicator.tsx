@@ -89,7 +89,6 @@ export const ConnectionIndicator = ({ status, className }: ConnectionIndicatorPr
   );
 };
 
-// Versão compacta (apenas ícone e dot)
 export const ConnectionIndicatorCompact = ({ status }: ConnectionIndicatorProps) => {
   const config = statusConfig[status];
 

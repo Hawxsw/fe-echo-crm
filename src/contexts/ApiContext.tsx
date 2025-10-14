@@ -13,7 +13,7 @@ interface IApiProviderProps {
 }
 
 export const ApiProvider = ({ children }: IApiProviderProps) => {
-  // Criar uma única instância de ApiService que será compartilhada
+
   const apiService = useMemo(() => {
     const logout = () => {
       clearAuthStorage();

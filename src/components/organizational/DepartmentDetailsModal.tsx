@@ -61,9 +61,8 @@ export const DepartmentDetailsModal = ({
 }: DepartmentDetailsModalProps) => {
   if (!department) return null;
 
-  // Para o departamento CEO, usar o CEO como chefe
   const departmentHead = department.id === 'ceo-structure' 
-    ? null // Será tratado especialmente no modal
+    ? null
     : department.users?.find(user => user.isDepartmentHead);
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -88,7 +87,6 @@ export const DepartmentDetailsModal = ({
         </SheetHeader>
 
         <div className="space-y-6">
-          {/* Informações do Departamento - Apenas para departamentos normais */}
           {department.id !== 'ceo-structure' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -138,7 +136,6 @@ export const DepartmentDetailsModal = ({
           </div>
           )}
 
-          {/* Chefe do Departamento ou CEO */}
           {(departmentHead || (department.id === 'ceo-structure' && ceoUser)) && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -189,10 +186,7 @@ export const DepartmentDetailsModal = ({
             </div>
           )}
 
-
-          {/* Estrutura Organizacional para CEO ou Colaboradores para Departamentos */}
           {department.id === 'ceo-structure' ? (
-            /* Estrutura de Departamentos para CEO */
           <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-blue-500" />
@@ -223,7 +217,6 @@ export const DepartmentDetailsModal = ({
                         </Badge>
                       </div>
                       
-                      {/* Chefe do Departamento */}
                       {dept.users?.find(user => user.isDepartmentHead) && (
                         <div className="mb-3">
                           <div className="flex items-center gap-2 mb-2">
@@ -252,7 +245,6 @@ export const DepartmentDetailsModal = ({
                         </div>
                       )}
                       
-                      {/* Colaboradores do Departamento */}
                       {dept.users && dept.users.filter(user => !user.isDepartmentHead).length > 0 && (
                         <div>
                           <div className="flex items-center gap-2 mb-2">
@@ -299,7 +291,6 @@ export const DepartmentDetailsModal = ({
               )}
             </div>
           ) : (
-            /* Colaboradores para Departamentos Normais */
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2 min-w-0">

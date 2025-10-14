@@ -16,7 +16,7 @@ interface RoleFormProps {
   mode: 'create' | 'edit';
 }
 
-// Recursos disponíveis
+
 const RESOURCES: Array<{ value: PermissionResource; label: string }> = [
   { value: 'USERS', label: 'Usuários' },
   { value: 'ROLES', label: 'Funções' },
@@ -27,7 +27,7 @@ const RESOURCES: Array<{ value: PermissionResource; label: string }> = [
   { value: 'REPORTS', label: 'Relatórios' },
 ];
 
-// Ações disponíveis
+
 const ACTIONS: Array<{ value: PermissionAction; label: string; description: string }> = [
   { value: 'CREATE', label: 'Criar', description: 'Criar novos registros' },
   { value: 'READ', label: 'Visualizar', description: 'Visualizar registros existentes' },
@@ -72,7 +72,7 @@ export const RoleForm = ({ mode }: RoleFormProps) => {
           permissions: role.permissions || [],
         });
 
-        // Carregar permissões selecionadas
+
         const permSet = new Set<string>();
         role.permissions?.forEach(perm => {
           permSet.add(`${perm.resource}-${perm.action}`);
@@ -111,7 +111,7 @@ export const RoleForm = ({ mode }: RoleFormProps) => {
     
     setSelectedPermissions(newSelected);
 
-    // Atualizar formData com as permissões
+
     const permissions: IPermission[] = Array.from(newSelected).map(k => {
       const [res, act] = k.split('-');
       return {
@@ -134,12 +134,12 @@ export const RoleForm = ({ mode }: RoleFormProps) => {
     const newSelected = new Set(selectedPermissions);
 
     if (allActionsSelected) {
-      // Desmarcar todas as ações deste recurso
+
       ACTIONS.forEach(action => {
         newSelected.delete(`${resource}-${action.value}`);
       });
     } else {
-      // Marcar todas as ações deste recurso
+
       ACTIONS.forEach(action => {
         newSelected.add(`${resource}-${action.value}`);
       });
@@ -147,7 +147,7 @@ export const RoleForm = ({ mode }: RoleFormProps) => {
 
     setSelectedPermissions(newSelected);
 
-    // Atualizar formData
+
     const permissions: IPermission[] = Array.from(newSelected).map(k => {
       const [res, act] = k.split('-');
       return {

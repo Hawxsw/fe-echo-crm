@@ -1,4 +1,4 @@
-// =============== Board Types ===============
+
 
 export interface IBoard {
   id: string;
@@ -22,7 +22,7 @@ export interface IUpdateBoard {
   isActive?: boolean;
 }
 
-// =============== Column Types ===============
+
 
 export interface IColumn {
   id: string;
@@ -57,7 +57,7 @@ export interface IMoveColumn {
   newPosition: number;
 }
 
-// =============== Card Types ===============
+
 
 export type CardPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
@@ -108,7 +108,7 @@ export interface IMoveCard {
   newPosition: number;
 }
 
-// =============== Comment Types ===============
+
 
 export interface IComment {
   id: string;

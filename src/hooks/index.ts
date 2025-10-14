@@ -16,3 +16,4 @@ export { useApi } from './useApi';
 export { useAsyncOperation } from './useAsyncOperation';
 export { useWebSocket } from './useWebSocket';
 export { useNotifications } from './useNotifications';
+export { useToast } from './useToast';

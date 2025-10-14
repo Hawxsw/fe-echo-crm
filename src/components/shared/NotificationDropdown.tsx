@@ -75,12 +75,10 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
         onClose();
       } catch (error) {
         console.error('Erro ao navegar para:', notification.actionUrl, error);
-        // Fallback: navegar para dashboard se a rota for inválida
         navigate('/dashboard');
         onClose();
       }
     } else {
-      // Se não tem actionUrl, navegar para dashboard
       navigate('/dashboard');
       onClose();
     }
@@ -103,21 +101,19 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
     }
   };
 
+
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <div 
         className="fixed inset-0 z-40" 
         onClick={onClose}
       />
 
-      {/* Dropdown */}
       <div 
         className="absolute right-0 mt-2 w-96 max-h-[600px] rounded-xl shadow-2xl bg-white ring-1 ring-black ring-opacity-5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50 flex flex-col"
       >
-        {/* Header */}
         <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -143,7 +139,6 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
             </button>
           </div>
 
-          {/* Actions */}
           {notifications.length > 0 && (
             <div className="flex items-center justify-between mt-3 text-sm">
               {unreadCount > 0 && (
@@ -166,7 +161,6 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
           )}
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
@@ -189,13 +183,11 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
                     ${!notification.isRead ? 'bg-blue-50/30' : ''}
                   `}
                 >
-                  {/* Unread indicator */}
                   {!notification.isRead && (
                     <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full" />
                   )}
 
                   <div className="flex items-start space-x-3 ml-4">
-                    {/* Icon */}
                     <div className={`
                       flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border
                       ${getNotificationColor(notification.type)}
@@ -203,7 +195,6 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
                       {getNotificationIcon(notification.type)}
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <p className="text-sm font-semibold text-slate-900 line-clamp-1">
@@ -254,7 +245,6 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
           )}
         </div>
 
-        {/* Footer */}
         {notifications.length > 5 && (
           <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-3 text-center">
             <button

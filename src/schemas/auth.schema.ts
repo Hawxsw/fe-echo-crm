@@ -50,7 +50,7 @@ export const registerSchema = z.object({
   roleId: z.string().uuid({ message: 'ID do role inválido.' }).optional(),
 });
 
-// Type inference dos schemas
+
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type RegisterSchema = z.infer<typeof registerSchema>;
 

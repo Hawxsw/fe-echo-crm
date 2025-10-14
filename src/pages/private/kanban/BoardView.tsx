@@ -42,30 +42,30 @@ export default function BoardView() {
   const [loading, setLoading] = useState(true);
   const [showNewColumnDialog, setShowNewColumnDialog] = useState(false);
 
-  // Column editor states
+
   const [showColumnEditor, setShowColumnEditor] = useState(false);
   const [editingColumn, setEditingColumn] = useState<any>(null);
   const [columnEditorMode, setColumnEditorMode] = useState<'create' | 'edit'>('create');
 
-  // Confirmation dialog states
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<{id: string, name: string} | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Card editor states
+
   const [showCardEditor, setShowCardEditor] = useState(false);
   const [editingCard, setEditingCard] = useState<any>(null);
   const [cardEditorMode, setCardEditorMode] = useState<'create' | 'edit'>('create');
 
-  // Card delete confirmation states
+
   const [showCardDeleteConfirm, setShowCardDeleteConfirm] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<{id: string, title: string} | null>(null);
   const [isDeletingCard, setIsDeletingCard] = useState(false);
 
-  // Drag and drop states
+
   const [activeCard, setActiveCard] = useState<any>(null);
 
-  // Card form state
+
   const [cardForm, setCardForm] = useState<ICreateCard>({
     title: '',
     description: '',
@@ -74,7 +74,7 @@ export default function BoardView() {
     tags: [],
   });
 
-  // Drag and drop sensors com configurações melhoradas
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -95,10 +95,10 @@ export default function BoardView() {
     try {
       setLoading(true);
       const boardData = await getBoardById(id!);
-      // Ordenar colunas por posição
+
       if (boardData.columns) {
         boardData.columns.sort((a, b) => a.position - b.position);
-        // Ordenar cards dentro de cada coluna
+
         boardData.columns.forEach(column => {
           if (column.cards) {
             column.cards.sort((a, b) => a.position - b.position);
@@ -134,7 +134,7 @@ export default function BoardView() {
       });
       toast.success('Coluna criada com sucesso!');
       } else {
-        // Implementar update quando a API estiver pronta
+
         toast.success('Coluna atualizada com sucesso!');
       }
       
@@ -148,16 +148,16 @@ export default function BoardView() {
   };
 
   const handleDeleteColumn = async (columnId: string, columnName: string) => {
-    // Verificar se a coluna tem cards
+
     const column = board?.columns?.find(c => c.id === columnId);
     const cardCount = column?.cards?.length || 0;
     
     if (cardCount > 0) {
-      // Se tem cards, mostrar aviso
+
       setColumnToDelete({ id: columnId, name: columnName });
       setShowDeleteConfirm(true);
     } else {
-      // Se não tem cards, deletar diretamente
+
       setColumnToDelete({ id: columnId, name: columnName });
       setShowDeleteConfirm(true);
     }
@@ -227,7 +227,7 @@ export default function BoardView() {
         });
         toast.success('Card atualizado com sucesso!');
       } else {
-        // Este caso não deveria acontecer no CardEditor, mas por segurança
+
         toast.error('Modo de criação não suportado neste contexto');
       }
       
@@ -241,7 +241,7 @@ export default function BoardView() {
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    // Encontrar o card para obter o título
+
     let cardTitle = 'Card';
     if (board?.columns) {
       for (const column of board.columns) {
@@ -275,7 +275,7 @@ export default function BoardView() {
     }
   };
 
-  // Drag and drop handlers
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const card = findCardById(active.id as string);
@@ -293,30 +293,30 @@ export default function BoardView() {
     const activeCardId = active.id as string;
     const overId = over.id as string;
 
-    // Se está sendo movido para a mesma coluna, não faz nada
+
     if (activeCard.columnId === overId) {
       setActiveCard(null);
       return;
     }
 
     try {
-      // Encontra a nova posição na coluna de destino
+
       const targetColumn = board?.columns?.find(col => col.id === overId);
       const newPosition = targetColumn?.cards?.length || 0;
 
-      // Atualiza o estado localmente primeiro (otimistic update)
+
       setBoard(prevBoard => {
         if (!prevBoard) return prevBoard;
 
         const updatedColumns = prevBoard.columns?.map(column => {
           if (column.id === activeCard.columnId) {
-            // Remove o card da coluna original
+
             return {
               ...column,
               cards: column.cards?.filter(card => card.id !== activeCardId) || []
             };
           } else if (column.id === overId) {
-            // Adiciona o card na nova coluna
+
             const updatedCard = { ...activeCard, columnId: overId };
             return {
               ...column,
@@ -332,14 +332,14 @@ export default function BoardView() {
         };
       });
 
-      // Chama a API para mover o card em background
+
       moveCard(activeCardId, {
         targetColumnId: overId,
         newPosition,
       }).catch(error => {
         console.error('Erro ao mover card:', error);
         toast.error('Erro ao mover card');
-        // Reverte a mudança se a API falhar
+
         loadBoard();
       });
 

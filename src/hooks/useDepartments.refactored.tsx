@@ -12,17 +12,6 @@ import {
 import { unwrapApiResponse } from '@/utils/unwrapApiResponse';
 import { MESSAGES } from '@/constants/messages';
 
-/**
- * Hook de Departments refatorado usando useAsyncOperation.
- * 
- * Melhorias:
- * - Elimina duplicação de try/catch
- * - Tratamento de erro padronizado
- * - Mensagens de sucesso/erro consistentes
- * - Código mais limpo e conciso
- * - Menos bugs por consistência
- */
-
 interface IDepartmentsContext {
   departments: IDepartment[];
   organizationalStructure: IDepartment[];
@@ -147,7 +136,6 @@ export const DepartmentsProvider = ({ children }: { children: ReactNode }) => {
       async () => {
         const response = await api.department.move(id, data);
         const moved = unwrapApiResponse(response) as IDepartment;
-        // Recarrega listas após mover
         await Promise.all([fetchDepartments(), fetchOrganizationalStructure()]);
         return moved;
       },

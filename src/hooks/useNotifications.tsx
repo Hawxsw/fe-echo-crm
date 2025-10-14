@@ -22,7 +22,6 @@ export const useNotifications = () => {
   const { currentUser } = useAuth();
   const apiService = useApiService();
 
-  // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     if (!currentUser?.id) return;
     
@@ -38,7 +37,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications, currentUser?.id]);
 
-  // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {
     if (!currentUser?.id) return;
     
@@ -50,7 +48,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications, currentUser?.id]);
 
-  // Mark as read
   const markAsRead = useCallback(async (notificationIds: string[]) => {
     try {
       await apiService.notifications.markAsRead({ notificationIds });
@@ -65,7 +62,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications, fetchUnreadCount]);
 
-  // Mark all as read
   const markAllAsRead = useCallback(async () => {
     try {
       await apiService.notifications.markAllAsRead();
@@ -78,7 +74,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications]);
 
-  // Delete notification
   const deleteNotification = useCallback(async (id: string) => {
     try {
       await apiService.notifications.delete(id);
@@ -89,7 +84,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications, fetchUnreadCount]);
 
-  // Delete all notifications
   const deleteAllNotifications = useCallback(async () => {
     try {
       await apiService.notifications.deleteAll();
@@ -100,7 +94,6 @@ export const useNotifications = () => {
     }
   }, [apiService.notifications]);
 
-  // WebSocket connection
   useEffect(() => {
     if (!currentUser?.id) return;
 
@@ -135,7 +128,6 @@ export const useNotifications = () => {
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
         
-        // Show browser notification if permission granted
         if (Notification.permission === 'granted') {
           new Notification(notification.title, {
             body: notification.message,
@@ -162,7 +154,6 @@ export const useNotifications = () => {
     }
   }, [currentUser?.id]);
 
-  // Initial load
   useEffect(() => {
     if (currentUser?.id) {
       fetchNotifications();
@@ -170,7 +161,6 @@ export const useNotifications = () => {
     }
   }, [currentUser?.id, fetchNotifications, fetchUnreadCount]);
 
-  // Request notification permission
   useEffect(() => {
     if (Notification.permission === 'default') {
       Notification.requestPermission();

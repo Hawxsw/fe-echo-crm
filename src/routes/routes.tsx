@@ -5,11 +5,12 @@ import { UserLayout } from './layouts/UserLayout';
 import { useAuth } from '../hooks/useAuth';
 import { PERMISSIONS } from '../constants/permissions';
 
-// Pages
+
 import Landing from '../pages/public/Landing';
 import Login from '../pages/public/Login';
 import Register from '../pages/public/Register';
 import Dashboard from '../pages/private/Dashboard';
+import Profile from '../pages/private/Profile';
 import OrganizationalStructure from '../pages/private/OrganizationalStructure';
 import DepartmentsList from '../pages/private/departments/DepartmentsList';
 import DepartmentDetails from '../pages/private/departments/DepartmentDetails';
@@ -27,6 +28,10 @@ import SalesKanban from '../pages/private/kanban/SalesKanban';
 import InternalChat from '../pages/private/chat/InternalChat';
 import ConversationsList from '../pages/private/whatsapp/ConversationsList';
 import ConversationView from '../pages/private/whatsapp/ConversationView';
+import Settings from '../pages/private/settings/Settings';
+import Reports from '../pages/private/reports/Reports';
+import Support from '../pages/private/support/Support';
+import Feedback from '../pages/private/feedback/Feedback';
 
 interface IRouteInterface {
   path: string;
@@ -112,6 +117,18 @@ export const routes = createRoutes({
           conversation: { path: '/:id' },
         },
       },
+      settings: {
+        path: '/settings',
+      },
+      reports: {
+        path: '/reports',
+      },
+      support: {
+        path: '/support',
+      },
+      feedback: {
+        path: '/feedback',
+      },
     },
   },
   profile: {
@@ -132,9 +149,9 @@ export const Router = () => {
 
         {/* Private routes */}
         <Route element={<PrivateRoute />}>
-          {/* User Layout - rotas para usuários comuns */}
-          <Route element={<UserLayout />}>
-            <Route path={routes.profile.path} element={<div>Perfil</div>} />
+          {/* Profile route with Dashboard Layout */}
+          <Route path={routes.profile.path} element={<DashboardLayout />}>
+            <Route index element={<Profile />} />
           </Route>
 
           {/* Dashboard Layout - rotas administrativas */}
@@ -266,6 +283,30 @@ export const Router = () => {
                 />
               </>
             )}
+
+            {/* Settings */}
+            <Route
+              path={routes.dashboard.routes.settings.path}
+              element={<Settings />}
+            />
+
+            {/* Reports */}
+            <Route
+              path={routes.dashboard.routes.reports.path}
+              element={<Reports />}
+            />
+
+            {/* Support */}
+            <Route
+              path={routes.dashboard.routes.support.path}
+              element={<Support />}
+            />
+
+            {/* Feedback */}
+            <Route
+              path={routes.dashboard.routes.feedback.path}
+              element={<Feedback />}
+            />
           </Route>
         </Route>
 

@@ -85,7 +85,7 @@ export const UserForm = ({ mode }: UserFormProps) => {
       [field]: value,
     }));
     
-    // Limpar erro do campo quando o usuário começar a digitar
+
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,

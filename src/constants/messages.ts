@@ -8,7 +8,7 @@
  */
 
 export const MESSAGES = {
-  // Mensagens de sucesso
+
   SUCCESS: {
     DEPARTMENT_CREATED: 'Departamento criado com sucesso!',
     DEPARTMENT_UPDATED: 'Departamento atualizado com sucesso!',
@@ -21,7 +21,7 @@ export const MESSAGES = {
     SAVED: 'Salvo com sucesso!',
   },
 
-  // Mensagens de erro
+
   ERROR: {
     GENERIC: 'Ocorreu um erro inesperado',
     DEPARTMENT_LOAD: 'Erro ao carregar departamentos',
@@ -38,7 +38,7 @@ export const MESSAGES = {
     NETWORK: 'Erro de conexão. Verifique sua internet.',
   },
 
-  // Mensagens de confirmação
+
   CONFIRM: {
     DELETE_DEPARTMENT: (name: string) =>
       `Tem certeza que deseja excluir o departamento "${name}"?`,
@@ -49,7 +49,7 @@ export const MESSAGES = {
     UNSAVED_CHANGES: 'Você tem alterações não salvas. Deseja sair mesmo assim?',
   },
 
-  // Mensagens informativas
+
   INFO: {
     NO_DEPARTMENTS: 'Nenhum departamento encontrado',
     NO_USERS: 'Nenhum usuário encontrado',

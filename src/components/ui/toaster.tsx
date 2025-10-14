@@ -10,7 +10,6 @@ export const Toaster = () => {
       containerClassName=""
       containerStyle={{}}
       toastOptions={{
-        // Default options for all toasts
         duration: 4000,
         style: {
           background: '#fff',
@@ -23,7 +22,6 @@ export const Toaster = () => {
           fontWeight: '500',
           maxWidth: '400px',
         },
-        // Success toast
         success: {
           duration: 3000,
           style: {
@@ -36,7 +34,6 @@ export const Toaster = () => {
             secondary: '#f0fdf4',
           },
         },
-        // Error toast
         error: {
           duration: 5000,
           style: {
@@ -49,7 +46,6 @@ export const Toaster = () => {
             secondary: '#fef2f2',
           },
         },
-        // Loading toast
         loading: {
           duration: Infinity,
           style: {
@@ -63,7 +59,6 @@ export const Toaster = () => {
   );
 };
 
-// Custom toast components
 export const toast = {
   success: (message: string, options?: any) => {
     return import('react-hot-toast').then(({ default: toast }) =>

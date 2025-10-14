@@ -8,10 +8,8 @@ export const usePresence = (isConnected: boolean) => {
 
   useEffect(() => {
     if (isConnected && currentUser) {
-      // Definir o usuário atual como online quando conectado
       updateUserStatus(currentUser.id, 'online');
     } else if (!isConnected && currentUser) {
-      // Definir como offline quando desconectado
       updateUserStatus(currentUser.id, 'offline');
     }
   }, [isConnected, currentUser, updateUserStatus]);

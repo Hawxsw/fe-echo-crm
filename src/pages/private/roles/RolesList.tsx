@@ -30,7 +30,7 @@ export default function RolesList() {
   const { roles, loading, deleteRole, getAllRoles } = useRoles();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Carregar roles quando o componente montar
+
   useEffect(() => {
     const loadRoles = async () => {
       try {

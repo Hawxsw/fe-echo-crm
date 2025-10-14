@@ -1,4 +1,4 @@
-// ============= Types para o sistema de chat interno =============
+
 
 export type UserStatus = 'online' | 'offline' | 'away' | 'in_meeting';
 
@@ -95,7 +95,7 @@ export interface ChatNotification {
   read: boolean;
 }
 
-// Estado do chat
+
 export interface ChatState {
   channels: Channel[];
   messages: Record<string, Message[]>; // channelId -> messages
@@ -109,7 +109,7 @@ export interface ChatState {
   threadMessage: Message | null;
 }
 
-// Ações do chat
+
 export type ChatAction =
   | { type: 'SET_CHANNELS'; payload: Channel[] }
   | { type: 'SET_MESSAGES'; payload: { channelId: string; messages: Message[] } }

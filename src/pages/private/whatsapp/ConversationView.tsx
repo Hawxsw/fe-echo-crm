@@ -35,7 +35,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Mock Data - Conversas
+
 const mockConversations = [
   {
     id: '1',
@@ -55,7 +55,7 @@ const mockConversations = [
   },
 ];
 
-// Mock Data - Mensagens
+
 const mockMessages: Record<string, any[]> = {
   '1': [
     {
@@ -132,14 +132,14 @@ export default function ConversationView() {
   const [selectedImage, setSelectedImage] = useState('');
 
   useEffect(() => {
-    // Simular carregamento da conversa
+
     const conv = mockConversations.find(c => c.id === id);
     if (conv) {
       setConversation(conv);
       setMessages(mockMessages[id || '1'] || []);
     }
 
-    // Simular indicador de digitação
+
     const typingTimer = setTimeout(() => {
       setIsTyping(true);
       setTimeout(() => setIsTyping(false), 3000);
@@ -149,7 +149,7 @@ export default function ConversationView() {
   }, [id]);
 
   useEffect(() => {
-    // Scroll para o fim quando novas mensagens chegarem
+
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
@@ -169,7 +169,7 @@ export default function ConversationView() {
     setMessages([...messages, message]);
     setNewMessage('');
 
-    // Simular status de entregue e lido
+
     setTimeout(() => {
       setMessages(prev => prev.map(msg => 
         msg.id === message.id ? { ...msg, status: 'delivered' } : msg

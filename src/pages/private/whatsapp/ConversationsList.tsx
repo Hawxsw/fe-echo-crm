@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Mock Data - Dados simulados
+
 const mockConversations = [
   {
     id: '1',
@@ -90,7 +90,7 @@ export default function ConversationsList() {
     conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Separar conversas fixadas das demais
+
   const pinnedConversations = filteredConversations.filter(c => c.isPinned);
   const regularConversations = filteredConversations.filter(c => !c.isPinned);
 
@@ -311,7 +311,7 @@ export default function ConversationsList() {
   );
 }
 
-// Componente de item de conversa
+
 interface ConversationItemProps {
   conversation: typeof mockConversations[0];
   onClick: () => void;

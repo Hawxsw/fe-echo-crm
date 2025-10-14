@@ -29,9 +29,6 @@ export const RolesProvider = ({ children }: IRolesProviderProps) => {
   const apiService = useApiService();
   const { roles: rolesApi } = apiService;
 
-  // REMOVIDO: Não carregar roles automaticamente
-  // Os dados serão carregados apenas quando necessário pelos componentes
-
   const loadRoles = useCallback(async () => {
     try {
       setLoading(true);

@@ -64,7 +64,7 @@ export default function OrganizationalStructure() {
     getOrganizationalStructure();
   }, [getOrganizationalStructure]);
 
-  // Buscar usuário CEO e todos os usuários
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -138,7 +138,7 @@ export default function OrganizationalStructure() {
   };
 
   const handleEditUser = async (_user: any) => {
-    // TODO: Implementar edição de usuário via modal
+
   };
 
   const handleDeleteUser = (userId: string) => {

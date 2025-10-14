@@ -43,7 +43,7 @@ export default function Login() {
           password: data.password,
         });
         toast.success('Login realizado com sucesso!');
-        // Não precisa navegar aqui - o useEffect já faz isso quando currentUser muda
+
       } catch (error) {
         if (error instanceof AxiosError) {
           const message = error.response?.data?.message || 'Senha ou e-mail inválido';
@@ -58,7 +58,7 @@ export default function Login() {
     [login],
   );
 
-  // Não renderiza o formulário se já estiver autenticado
+
   if (currentUser && token) {
     return null;
   }

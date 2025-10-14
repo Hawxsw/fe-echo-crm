@@ -8,7 +8,6 @@ import {
   MessageAttachment,
 } from '@/types/internal-chat';
 
-// ============= Mock Data =============
 const mockCollaborators: Collaborator[] = [
   {
     id: '1',
@@ -273,7 +272,6 @@ const mockMessages: Record<string, Message[]> = {
   ],
 };
 
-// Usuário atual (mock)
 const currentUser: Collaborator = {
   id: 'current-user',
   name: 'Você',
@@ -284,7 +282,6 @@ const currentUser: Collaborator = {
   status: 'online',
 };
 
-// ============= Reducer =============
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
     case 'SET_CHANNELS':
@@ -303,7 +300,6 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
       const channelId = action.payload.channelId;
       const currentMessages = state.messages[channelId] || [];
       
-      // Atualizar última mensagem do canal
       const updatedChannels = state.channels.map(channel => 
         channel.id === channelId 
           ? { ...channel, lastMessage: action.payload, unreadCount: 0 }
@@ -348,7 +344,6 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
       };
 
     case 'SET_CURRENT_CHANNEL':
-      // Marcar como lido ao abrir canal
       const channelsWithRead = state.channels.map(channel =>
         channel.id === action.payload
           ? { ...channel, unreadCount: 0 }
@@ -388,7 +383,6 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
             const existingReaction = msg.reactions.find(r => r.emoji === emoji);
             
             if (existingReaction) {
-              // Adicionar usuário à reação existente
               return {
                 ...msg,
                 reactions: msg.reactions.map(r =>
@@ -398,7 +392,6 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
                 ),
               };
             } else {
-              // Criar nova reação
               return {
                 ...msg,
                 reactions: [...msg.reactions, { emoji, users: [userId], count: 1 }],
@@ -508,7 +501,6 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   }
 };
 
-// ============= Hook =============
 export const useInternalChat = () => {
   const [state, dispatch] = useReducer(chatReducer, {
     channels: mockChannels,
@@ -523,7 +515,7 @@ export const useInternalChat = () => {
     threadMessage: null,
   });
 
-  // Funções auxiliares
+
   const sendMessage = useCallback((content: string, attachments: MessageAttachment[] = []) => {
     if (!state.currentChannelId) return;
 
@@ -542,7 +534,6 @@ export const useInternalChat = () => {
 
     dispatch({ type: 'ADD_MESSAGE', payload: newMessage });
 
-    // Simular entrega após 1s
     setTimeout(() => {
       dispatch({
         type: 'UPDATE_MESSAGE',
@@ -649,12 +640,10 @@ export const useInternalChat = () => {
     dispatch({ type: 'ARCHIVE_CHANNEL', payload: channelId });
   }, []);
 
-  // Filtrar canais baseado na busca
   const filteredChannels = state.channels.filter(channel =>
     channel.name.toLowerCase().includes(state.searchQuery.toLowerCase())
   );
 
-  // Ordenar canais (fixados primeiro, depois por última mensagem)
   const sortedChannels = [...filteredChannels].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
@@ -669,7 +658,6 @@ export const useInternalChat = () => {
   const currentMessages = state.currentChannelId ? state.messages[state.currentChannelId] || [] : [];
 
   return {
-    // Estado
     channels: sortedChannels,
     collaborators: state.collaborators,
     currentChannel,
@@ -680,7 +668,6 @@ export const useInternalChat = () => {
     showThreadView: state.showThreadView,
     threadMessage: state.threadMessage,
 
-    // Ações
     sendMessage,
     editMessage,
     deleteMessage,

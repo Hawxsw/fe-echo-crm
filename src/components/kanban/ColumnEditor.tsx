@@ -47,7 +47,6 @@ export const ColumnEditor = ({ column, isOpen, onClose, onSave, mode }: ColumnEd
       description: description.trim() || undefined,
     });
     
-    // Reset form
     setName('');
     setColor('#3B82F6');
     setDescription('');
@@ -55,7 +54,6 @@ export const ColumnEditor = ({ column, isOpen, onClose, onSave, mode }: ColumnEd
   };
 
   const handleClose = () => {
-    // Reset form when closing
     setName(column?.name || '');
     setColor(column?.color || '#3B82F6');
     setDescription(column?.description || '');

@@ -23,7 +23,7 @@ import {
 export class SalesService {
   constructor(private api: AxiosInstance) {}
 
-  // ============ PIPELINE METHODS ============
+
 
   public async createPipeline(data: ICreatePipeline): Promise<ISalesPipeline> {
     const response = await this.api.post<ISalesPipeline>('/sales/pipelines', data);
@@ -49,7 +49,7 @@ export class SalesService {
     await this.api.delete(`/sales/pipelines/${id}`);
   }
 
-  // ============ STAGE METHODS ============
+
 
   public async createStage(pipelineId: string, data: ICreateStage): Promise<ISalesStage> {
     const response = await this.api.post<ISalesStage>(`/sales/pipelines/${pipelineId}/stages`, data);
@@ -70,7 +70,7 @@ export class SalesService {
     await this.api.delete(`/sales/stages/${id}`);
   }
 
-  // ============ OPPORTUNITY METHODS ============
+
 
   public async createOpportunity(data: ICreateOpportunity): Promise<ISalesOpportunity> {
     const response = await this.api.post<ISalesOpportunity>('/sales/opportunities', data);
@@ -96,7 +96,7 @@ export class SalesService {
     await this.api.delete(`/sales/opportunities/${id}`);
   }
 
-  // ============ COMMENT METHODS ============
+
 
   public async createComment(opportunityId: string, data: ICreateComment): Promise<ISalesComment> {
     const response = await this.api.post<ISalesComment>(`/sales/opportunities/${opportunityId}/comments`, data);
@@ -112,7 +112,7 @@ export class SalesService {
     await this.api.delete(`/sales/comments/${id}`);
   }
 
-  // ============ ACTIVITY METHODS ============
+
 
   public async createActivity(opportunityId: string, data: ICreateActivity): Promise<ISalesActivity> {
     const response = await this.api.post<ISalesActivity>(`/sales/opportunities/${opportunityId}/activities`, data);

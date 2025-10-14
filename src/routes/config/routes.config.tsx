@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { PERMISSIONS } from '@/constants/permissions';
 
-// Lazy loading de páginas para melhor performance
+
 const Dashboard = lazy(() => import('@/pages/private/Dashboard'));
 const OrganizationalStructure = lazy(() => import('@/pages/private/OrganizationalStructure'));
 const DepartmentsList = lazy(() => import('@/pages/private/departments/DepartmentsList'));
@@ -16,6 +16,10 @@ const RoleForm = lazy(() => import('@/pages/private/roles/RoleForm'));
 const BoardsList = lazy(() => import('@/pages/private/kanban/BoardsList'));
 const BoardView = lazy(() => import('@/pages/private/kanban/BoardView'));
 const BoardForm = lazy(() => import('@/pages/private/kanban/BoardForm'));
+const Settings = lazy(() => import('@/pages/private/settings/Settings'));
+const Reports = lazy(() => import('@/pages/private/reports/Reports'));
+const Support = lazy(() => import('@/pages/private/support/Support'));
+const Feedback = lazy(() => import('@/pages/private/feedback/Feedback'));
 
 /**
  * Configuração de rotas da aplicação.
@@ -164,6 +168,22 @@ export const dashboardRoutes: IRouteConfig[] = [
         element: <div>WhatsApp Conversation</div>,
       },
     ],
+  },
+  {
+    path: 'settings',
+    element: <Settings />,
+  },
+  {
+    path: 'reports',
+    element: <Reports />,
+  },
+  {
+    path: 'support',
+    element: <Support />,
+  },
+  {
+    path: 'feedback',
+    element: <Feedback />,
   },
 ];
 

@@ -1,4 +1,4 @@
-// ============ Sales Pipeline Types ============
+
 
 export interface ISalesPipeline {
   id: string;
@@ -93,7 +93,7 @@ export interface ISalesActivity {
   };
 }
 
-// ============ Create/Update DTOs ============
+
 
 export interface ICreatePipeline {
   name: string;

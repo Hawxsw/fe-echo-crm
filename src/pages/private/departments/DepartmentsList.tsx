@@ -58,7 +58,7 @@ export default function DepartmentsList() {
     });
 
   const handleDelete = async (id: string, name: string) => {
-    // TODO: Substituir por componente de diálogo customizado
+
     if (window.confirm(`Tem certeza que deseja excluir o departamento "${name}"?`)) {
       try {
         await deleteDepartment(id);

@@ -1,0 +1,840 @@
+import { useState, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  MessageSquareText,
+  Star,
+  ThumbsUp,
+  Send,
+  Heart,
+  Lightbulb,
+  Bug,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  Award,
+  MessageCircle,
+  Smile,
+  Frown,
+  Meh,
+  Calendar
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useToast } from '@/hooks/useToast';
+
+interface FeedbackForm {
+  type: string;
+  category: string;
+  rating: number;
+  title: string;
+  description: string;
+  priority: string;
+  anonymous: boolean;
+}
+
+interface FeedbackStats {
+  total: number;
+  thisMonth: number;
+  averageRating: number;
+  responseRate: number;
+  improvement: number;
+}
+
+interface FeedbackItem {
+  id: number;
+  type: string;
+  title: string;
+  rating: number;
+  status: string;
+  createdAt: string;
+  votes: number;
+}
+
+interface Suggestion {
+  title: string;
+  votes: number;
+  status: string;
+  description: string;
+}
+
+type FeedbackType = 'suggestion' | 'bug' | 'compliment' | 'complaint';
+type FeedbackStatus = 'under_review' | 'planned' | 'in_progress' | 'fixed' | 'acknowledged';
+
+const INITIAL_FORM_STATE: FeedbackForm = {
+  type: '',
+  category: '',
+  rating: 0,
+  title: '',
+  description: '',
+  priority: '',
+  anonymous: false
+};
+
+const MOCK_STATS: FeedbackStats = {
+  total: 1247,
+  thisMonth: 156,
+  averageRating: 4.2,
+  responseRate: 87,
+  improvement: 12.5
+};
+
+const MOCK_FEEDBACK: FeedbackItem[] = [
+  {
+    id: 1,
+    type: 'suggestion',
+    title: 'Adicionar modo escuro',
+    rating: 5,
+    status: 'under_review',
+    createdAt: '2024-01-15',
+    votes: 23
+  },
+  {
+    id: 2,
+    type: 'bug',
+    title: 'Erro ao salvar configurações',
+    rating: 2,
+    status: 'fixed',
+    createdAt: '2024-01-14',
+    votes: 8
+  },
+  {
+    id: 3,
+    type: 'compliment',
+    title: 'Interface muito intuitiva',
+    rating: 5,
+    status: 'acknowledged',
+    createdAt: '2024-01-13',
+    votes: 15
+  }
+];
+
+const MOCK_SUGGESTIONS: Suggestion[] = [
+  {
+    title: 'Integração com Slack',
+    votes: 45,
+    status: 'planned',
+    description: 'Permitir notificações via Slack'
+  },
+  {
+    title: 'Relatórios personalizados',
+    votes: 38,
+    status: 'in_progress',
+    description: 'Criar relatórios customizáveis'
+  },
+  {
+    title: 'API pública',
+    votes: 32,
+    status: 'under_review',
+    description: 'Documentação e endpoints públicos'
+  },
+  {
+    title: 'App mobile',
+    votes: 28,
+    status: 'planned',
+    description: 'Versão mobile para iOS e Android'
+  }
+];
+
+const FEEDBACK_TYPE_CONFIG = {
+  suggestion: { icon: Lightbulb, color: 'text-yellow-500', label: 'Sugestão' },
+  bug: { icon: Bug, color: 'text-red-500', label: 'Bug/Problema' },
+  compliment: { icon: Heart, color: 'text-pink-500', label: 'Elogio' },
+  complaint: { icon: AlertTriangle, color: 'text-orange-500', label: 'Reclamação' }
+} as const;
+
+const STATUS_CONFIG = {
+  under_review: { color: 'bg-yellow-100 text-yellow-700', label: 'Em Análise' },
+  planned: { color: 'bg-blue-100 text-blue-700', label: 'Planejado' },
+  in_progress: { color: 'bg-purple-100 text-purple-700', label: 'Em Desenvolvimento' },
+  fixed: { color: 'bg-green-100 text-green-700', label: 'Implementado' },
+  acknowledged: { color: 'bg-gray-100 text-gray-700', label: 'Reconhecido' }
+} as const;
+
+const RATING_LABELS: Record<number, string> = {
+  1: 'Péssimo',
+  2: 'Ruim',
+  3: 'Regular',
+  4: 'Bom',
+  5: 'Excelente'
+};
+
+interface StarRatingProps {
+  rating: number;
+  interactive?: boolean;
+  onRatingChange?: (rating: number) => void;
+}
+
+function StarRating({ rating, interactive = false, onRatingChange }: StarRatingProps) {
+  return (
+    <div className="flex space-x-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => interactive && onRatingChange?.(star)}
+          className={`${
+            interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'
+          } transition-transform`}
+          disabled={!interactive}
+        >
+          <Star
+            className={`h-5 w-5 ${
+              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface FeedbackIconProps {
+  type: string;
+}
+
+function FeedbackIcon({ type }: FeedbackIconProps) {
+  const config = FEEDBACK_TYPE_CONFIG[type as FeedbackType] || {
+    icon: MessageCircle,
+    color: 'text-blue-500'
+  };
+  const Icon = config.icon;
+  return <Icon className={`h-4 w-4 ${config.color}`} />;
+}
+
+interface StatusBadgeProps {
+  status: string;
+}
+
+function StatusBadge({ status }: StatusBadgeProps) {
+  const config = STATUS_CONFIG[status as FeedbackStatus] || STATUS_CONFIG.under_review;
+  return <Badge className={config.color}>{config.label}</Badge>;
+}
+
+export default function Feedback() {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
+  const [feedbackForm, setFeedbackForm] = useState<FeedbackForm>(INITIAL_FORM_STATE);
+
+  const handleSubmitFeedback = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Feedback enviado com sucesso",
+        description: "Obrigado pelo seu feedback! Ele será analisado pela nossa equipe.",
+        variant: "default",
+      });
+
+      setFeedbackForm(INITIAL_FORM_STATE);
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar feedback",
+        description: "Não foi possível enviar seu feedback. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [toast]);
+
+  const handleVote = useCallback((_feedbackId: number) => {
+    toast({
+      title: "Voto registrado",
+      description: "Seu voto foi contabilizado com sucesso.",
+      variant: "default",
+    });
+  }, [toast]);
+
+  const handleRatingChange = useCallback((rating: number) => {
+    setFeedbackForm(prev => ({ ...prev, rating }));
+  }, []);
+
+  const updateFormField = useCallback(<K extends keyof FeedbackForm>(
+    field: K,
+    value: FeedbackForm[K]
+  ) => {
+    setFeedbackForm(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  return (
+    <div className="space-y-8 pb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="relative"
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="relative">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Feedback
+            </h1>
+            <p className="text-muted-foreground mt-2 text-base font-light">
+              Sua opinião é fundamental para melhorarmos o sistema
+            </p>
+            <div className="absolute -top-1 -left-1 w-20 h-20 bg-primary/5 rounded-full blur-3xl -z-10" />
+          </div>
+          <Badge variant="secondary" className="bg-green-100 text-green-700 shadow-sm">
+            <TrendingUp className="h-3 w-3 mr-1" />
+            +{MOCK_STATS.improvement}% este mês
+          </Badge>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
+          <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total de Feedback</CardTitle>
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 transition-transform duration-300 group-hover:scale-110">
+                <MessageCircle className="h-6 w-6 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+                {MOCK_STATS.total.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                +{MOCK_STATS.thisMonth} este mês
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
+          <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Avaliação Média</CardTitle>
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 transition-transform duration-300 group-hover:scale-110">
+                <Star className="h-6 w-6 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+                {MOCK_STATS.averageRating}
+              </div>
+              <div className="flex items-center space-x-1">
+                <StarRating rating={Math.floor(MOCK_STATS.averageRating)} />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
+          <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Taxa de Resposta</CardTitle>
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 transition-transform duration-300 group-hover:scale-110">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+                {MOCK_STATS.responseRate}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Feedback respondido
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
+          <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Implementações</CardTitle>
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 transition-transform duration-300 group-hover:scale-110">
+                <Award className="h-6 w-6 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+                156
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Sugestões implementadas
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="general">Enviar Feedback</TabsTrigger>
+          <TabsTrigger value="recent">Recentes</TabsTrigger>
+          <TabsTrigger value="suggestions">Sugestões</TabsTrigger>
+          <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-lg">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+                      <MessageSquareText className="w-5 h-5 text-purple-600" />
+                    </div>
+                    Envie seu Feedback
+                  </CardTitle>
+                  <CardDescription className="text-sm mt-1">
+                  Compartilhe suas ideias, reporte problemas ou envie elogios
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="feedback-type">Tipo de Feedback</Label>
+                      <Select
+                        value={feedbackForm.type}
+                        onValueChange={(value) => updateFormField('type', value)}
+                      >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {(Object.entries(FEEDBACK_TYPE_CONFIG) as [FeedbackType, typeof FEEDBACK_TYPE_CONFIG[FeedbackType]][]).map(([key, config]) => (
+                            <SelectItem key={key} value={key}>
+                            <div className="flex items-center space-x-2">
+                                <config.icon className={`h-4 w-4 ${config.color}`} />
+                                <span>{config.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="feedback-category">Categoria</Label>
+                      <Select
+                        value={feedbackForm.category}
+                        onValueChange={(value) => updateFormField('category', value)}
+                      >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="ui">Interface do Usuário</SelectItem>
+                          <SelectItem value="performance">Performance</SelectItem>
+                          <SelectItem value="feature">Funcionalidade</SelectItem>
+                          <SelectItem value="integration">Integração</SelectItem>
+                          <SelectItem value="documentation">Documentação</SelectItem>
+                          <SelectItem value="other">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Avaliação Geral</Label>
+                    <div className="flex items-center space-x-2">
+                      <StarRating
+                        rating={feedbackForm.rating}
+                        interactive
+                        onRatingChange={handleRatingChange}
+                      />
+                      {feedbackForm.rating > 0 && (
+                        <span className="text-sm text-slate-500 ml-2">
+                            {RATING_LABELS[feedbackForm.rating]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="feedback-title">Título</Label>
+                    <Input
+                      id="feedback-title"
+                      value={feedbackForm.title}
+                        onChange={(e) => updateFormField('title', e.target.value)}
+                      placeholder="Resuma seu feedback em poucas palavras"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="feedback-description">Descrição Detalhada</Label>
+                    <Textarea
+                      id="feedback-description"
+                      value={feedbackForm.description}
+                        onChange={(e) => updateFormField('description', e.target.value)}
+                      placeholder="Descreva detalhadamente seu feedback, incluindo passos para reproduzir problemas..."
+                      rows={6}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="feedback-priority">Prioridade</Label>
+                      <Select
+                        value={feedbackForm.priority}
+                        onValueChange={(value) => updateFormField('priority', value)}
+                      >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a prioridade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="low">Baixa</SelectItem>
+                          <SelectItem value="medium">Média</SelectItem>
+                          <SelectItem value="high">Alta</SelectItem>
+                          <SelectItem value="critical">Crítica</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="anonymous"
+                      checked={feedbackForm.anonymous}
+                        onChange={(e) => updateFormField('anonymous', e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor="anonymous" className="text-sm">
+                      Enviar anonimamente
+                    </Label>
+                  </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full shadow-lg hover:shadow-xl transition-all duration-200" 
+                      disabled={isSubmitting}
+                    >
+                    {isSubmitting ? (
+                      <>
+                        <Clock className="h-4 w-4 mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Enviar Feedback
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+                <Card className="border-0 shadow-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+                        <Lightbulb className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      Feedback Rápido
+                  </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                    Envie feedback rápido sobre sua experiência
+                  </CardDescription>
+                </CardHeader>
+                  <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-2">
+                      <Button variant="outline" size="sm" className="h-auto p-3 flex flex-col items-center space-y-1 hover:bg-green-50 transition-colors">
+                        <Smile className="h-5 w-5 text-green-500" />
+                        <span className="text-xs">Ótimo!</span>
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-auto p-3 flex flex-col items-center space-y-1 hover:bg-yellow-50 transition-colors">
+                        <Meh className="h-5 w-5 text-yellow-500" />
+                        <span className="text-xs">Regular</span>
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-auto p-3 flex flex-col items-center space-y-1 hover:bg-red-50 transition-colors">
+                        <Frown className="h-5 w-5 text-red-500" />
+                        <span className="text-xs">Ruim</span>
+                      </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+                <Card className="border-0 shadow-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl">
+                        <Award className="w-5 h-5 text-blue-600" />
+                      </div>
+                      Suas Contribuições
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Feedback enviados:</span>
+                      <Badge variant="secondary">12</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Sugestões implementadas:</span>
+                      <Badge variant="secondary" className="bg-green-100 text-green-700">3</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Votos dados:</span>
+                      <Badge variant="secondary">47</Badge>
+                    </div>
+                </CardContent>
+              </Card>
+
+                <Card className="border-0 shadow-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+                        <TrendingUp className="w-5 h-5 text-purple-600" />
+                      </div>
+                      Top Sugestões
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    {MOCK_SUGGESTIONS.slice(0, 3).map((suggestion, index) => (
+                      <div key={suggestion.title} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate text-slate-900">{suggestion.title}</p>
+                          <p className="text-xs text-slate-500 truncate">{suggestion.votes} votos</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVote(index)}
+                          className="hover:bg-purple-100"
+                        >
+                          <ThumbsUp className="h-3 w-3" />
+                        </Button>
+                      </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="recent" className="space-y-4">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+                    <MessageCircle className="w-5 h-5 text-purple-600" />
+                  </div>
+                  Feedback Recente
+                </CardTitle>
+                <CardDescription className="text-sm mt-1">
+                  {MOCK_FEEDBACK.length} {MOCK_FEEDBACK.length === 1 ? 'feedback encontrado' : 'feedbacks encontrados'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {MOCK_FEEDBACK.map((feedback) => (
+                  <div key={feedback.id} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                          <FeedbackIcon type={feedback.type} />
+                          <h4 className="font-semibold text-slate-900">{feedback.title}</h4>
+                          <StatusBadge status={feedback.status} />
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-slate-500">
+                        <div className="flex items-center space-x-1">
+                          <StarRating rating={feedback.rating} />
+                        </div>
+                          <span>{new Date(feedback.createdAt).toLocaleDateString('pt-BR')}</span>
+                        <span>{feedback.votes} votos</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                        <Button variant="ghost" size="sm" className="hover:bg-purple-100">
+                        <ThumbsUp className="h-4 w-4 mr-1" />
+                        {feedback.votes}
+                      </Button>
+                        <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
+                        Ver Detalhes
+                      </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                </CardContent>
+              </Card>
+        </TabsContent>
+
+        <TabsContent value="suggestions" className="space-y-4">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+                    <Lightbulb className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  Sugestões da Comunidade
+                </CardTitle>
+                <CardDescription className="text-sm mt-1">
+                  Propostas e ideias da comunidade
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {MOCK_SUGGESTIONS.map((suggestion, index) => (
+                  <div key={suggestion.title} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <Lightbulb className="h-4 w-4 text-yellow-500" />
+                          <h4 className="font-semibold text-slate-900">{suggestion.title}</h4>
+                          <StatusBadge status={suggestion.status} />
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2">{suggestion.description}</p>
+                      <div className="flex items-center space-x-4 text-sm text-slate-500">
+                        <span>{suggestion.votes} votos</span>
+                        <span>Proposta pela comunidade</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleVote(index)}
+                          className="hover:bg-yellow-100"
+                        >
+                        <ThumbsUp className="h-4 w-4 mr-1" />
+                        {suggestion.votes}
+                      </Button>
+                        <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
+                        Comentar
+                      </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                </CardContent>
+              </Card>
+        </TabsContent>
+
+        <TabsContent value="roadmap" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl">
+                        <Clock className="w-5 h-5 text-blue-600" />
+                      </div>
+                      Em Desenvolvimento
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <p className="font-medium text-sm text-slate-900">Relatórios personalizados</p>
+                      <p className="text-xs text-slate-500">Previsão: Março 2024</p>
+                    </div>
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <p className="font-medium text-sm text-slate-900">API pública</p>
+                      <p className="text-xs text-slate-500">Previsão: Abril 2024</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+                        <Calendar className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      Planejado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                      <p className="font-medium text-sm text-slate-900">Integração com Slack</p>
+                      <p className="text-xs text-slate-500">Previsão: Maio 2024</p>
+                    </div>
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                      <p className="font-medium text-sm text-slate-900">App mobile</p>
+                      <p className="text-xs text-slate-500">Previsão: Junho 2024</p>
+                    </div>
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                      <p className="font-medium text-sm text-slate-900">Modo escuro</p>
+                      <p className="text-xs text-slate-500">Previsão: Julho 2024</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="p-2 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                      Implementado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                      <p className="font-medium text-sm text-slate-900">Chat interno</p>
+                      <p className="text-xs text-slate-500">Janeiro 2024</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                      <p className="font-medium text-sm text-slate-900">Notificações push</p>
+                      <p className="text-xs text-slate-500">Dezembro 2023</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                      <p className="font-medium text-sm text-slate-900">Exportação de dados</p>
+                      <p className="text-xs text-slate-500">Novembro 2023</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+          </div>
+        </TabsContent>
+      </Tabs>
+      </motion.div>
+    </div>
+  );
+}

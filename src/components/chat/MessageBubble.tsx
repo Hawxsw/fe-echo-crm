@@ -58,7 +58,6 @@ const detectCodeBlocks = (content: string) => {
   let match;
 
   while ((match = codeBlockRegex.exec(content)) !== null) {
-    // Adicionar texto antes do bloco de código
     if (match.index > lastIndex) {
       parts.push({
         type: 'text',
@@ -66,7 +65,6 @@ const detectCodeBlocks = (content: string) => {
       });
     }
 
-    // Adicionar bloco de código
     parts.push({
       type: 'code',
       content: match[2],
@@ -76,7 +74,6 @@ const detectCodeBlocks = (content: string) => {
     lastIndex = match.index + match[0].length;
   }
 
-  // Adicionar texto restante
   if (lastIndex < content.length) {
     parts.push({
       type: 'text',
@@ -142,7 +139,7 @@ export const MessageBubble = ({
     setContextMenuPosition(null);
   };
 
-  // Fechar menu de contexto ao clicar fora
+
   useEffect(() => {
     if (contextMenuPosition) {
       const handleClick = () => handleCloseContextMenu();
@@ -153,8 +150,7 @@ export const MessageBubble = ({
 
   const contentParts = detectCodeBlocks(message.content);
 
-  // Agrupar reações (se houver sistema de reações)
-  const reactions = message.isEdited ? [] : []; // Placeholder para futuras reações
+  const reactions = message.isEdited ? [] : [];
 
   return (
     <motion.div

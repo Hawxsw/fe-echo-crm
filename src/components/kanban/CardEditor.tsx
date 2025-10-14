@@ -54,7 +54,6 @@ export const CardEditor = ({ card, isOpen, onClose, onSave, mode }: CardEditorPr
       priority,
     });
     
-    // Reset form
     setTitle('');
     setDescription('');
     setPriority('MEDIUM');
@@ -62,7 +61,6 @@ export const CardEditor = ({ card, isOpen, onClose, onSave, mode }: CardEditorPr
   };
 
   const handleClose = () => {
-    // Reset form when closing
     if (mode === 'edit' && card) {
       setTitle(card.title || '');
       setDescription(card.description || '');
