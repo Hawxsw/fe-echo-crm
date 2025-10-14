@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import { UserLayout } from './layouts/UserLayout';
 import { useAuth } from '../hooks/useAuth';
 import { PERMISSIONS } from '../constants/permissions';
 
