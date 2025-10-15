@@ -12,4 +12,7 @@ export { RolesService } from './roles.service';
 export { ConversationService } from './conversation.service';
 export { WhatsAppMessageService } from './whatsapp-message.service';
 export { SalesService } from './sales.service';
+export { FeedbackService } from './feedback.service';
+export { SettingsService } from './settings.service';
+export { SupportService } from './support.service';
 

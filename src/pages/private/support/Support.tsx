@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,46 +17,18 @@ import {
   Search,
   Send,
   ExternalLink,
-  Download,
-  Video,
-  FileText,
-  Users,
-  Globe
+  Users
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/useToast';
+import { useApi } from '@/hooks/useApi';
+import { ITicket, IFAQ } from '@/types/support';
 
 interface TicketForm {
   subject: string;
   category: string;
   priority: string;
   description: string;
-}
-
-interface FAQItem {
-  id: number;
-  question: string;
-  answer: string;
-  category: string;
-  views: number;
-}
-
-interface Ticket {
-  id: string;
-  subject: string;
-  status: string;
-  priority: string;
-  createdAt: string;
-  updatedAt: string;
-  assignee: string;
-}
-
-interface Resource {
-  title: string;
-  description: string;
-  type: string;
-  size: string;
-  downloads: number;
 }
 
 const INITIAL_TICKET_FORM: TicketForm = {
@@ -66,132 +38,73 @@ const INITIAL_TICKET_FORM: TicketForm = {
   description: ''
 };
 
-const FAQ_DATA: FAQItem[] = [
-  {
-    id: 1,
-    question: "Como criar um novo usuário?",
-    answer: "Para criar um novo usuário, vá até a seção 'Usuários' no menu lateral, clique em 'Adicionar Usuário' e preencha os dados necessários.",
-    category: "Usuários",
-    views: 245
-  },
-  {
-    id: 2,
-    question: "Como configurar notificações?",
-    answer: "Acesse 'Configurações' no menu lateral e navegue até a aba 'Notificações' para personalizar suas preferências.",
-    category: "Configurações",
-    views: 189
-  },
-  {
-    id: 3,
-    question: "Como gerar relatórios?",
-    answer: "Na seção 'Relatórios', selecione o tipo de relatório desejado, configure os filtros e clique em 'Gerar Relatório'.",
-    category: "Relatórios",
-    views: 156
-  },
-  {
-    id: 4,
-    question: "Como conectar WhatsApp?",
-    answer: "Vá até 'WhatsApp' no menu, clique em 'Conectar Conta' e siga as instruções para vincular sua conta.",
-    category: "Integrações",
-    views: 134
-  }
-];
-
-const TICKET_DATA: Ticket[] = [
-  {
-    id: 'TK-001',
-    subject: 'Problema com login',
-    status: 'open',
-    priority: 'high',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-15',
-    assignee: 'Suporte Técnico'
-  },
-  {
-    id: 'TK-002',
-    subject: 'Dúvida sobre relatórios',
-    status: 'in_progress',
-    priority: 'medium',
-    createdAt: '2024-01-14',
-    updatedAt: '2024-01-15',
-    assignee: 'Ana Silva'
-  },
-  {
-    id: 'TK-003',
-    subject: 'Solicitação de nova funcionalidade',
-    status: 'closed',
-    priority: 'low',
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-12',
-    assignee: 'João Santos'
-  }
-];
-
-const RESOURCES: Resource[] = [
-  {
-    title: "Guia do Usuário",
-    description: "Documentação completa sobre como usar o sistema",
-    type: "PDF",
-    size: "2.4 MB",
-    downloads: 1247
-  },
-  {
-    title: "Vídeo Tutorial - Primeiros Passos",
-    description: "Aprenda os conceitos básicos em 15 minutos",
-    type: "Vídeo",
-    size: "45 MB",
-    downloads: 892
-  },
-  {
-    title: "API Documentation",
-    description: "Documentação técnica para desenvolvedores",
-    type: "HTML",
-    size: "1.2 MB",
-    downloads: 456
-  },
-  {
-    title: "Política de Privacidade",
-    description: "Como protegemos seus dados",
-    type: "PDF",
-    size: "0.8 MB",
-    downloads: 234
-  }
-];
-
 const STATUS_CONFIG = {
-  open: { color: 'bg-red-100 text-red-700', label: 'Aberto' },
-  in_progress: { color: 'bg-yellow-100 text-yellow-700', label: 'Em Andamento' },
-  closed: { color: 'bg-green-100 text-green-700', label: 'Fechado' }
+  OPEN: { color: 'bg-red-100 text-red-700', label: 'Aberto' },
+  IN_PROGRESS: { color: 'bg-yellow-100 text-yellow-700', label: 'Em Andamento' },
+  CLOSED: { color: 'bg-green-100 text-green-700', label: 'Fechado' }
 } as const;
 
 const PRIORITY_CONFIG = {
-  low: { color: 'bg-blue-100 text-blue-700', label: 'Baixa' },
-  medium: { color: 'bg-yellow-100 text-yellow-700', label: 'Média' },
-  high: { color: 'bg-red-100 text-red-700', label: 'Alta' }
+  LOW: { color: 'bg-blue-100 text-blue-700', label: 'Baixa' },
+  MEDIUM: { color: 'bg-yellow-100 text-yellow-700', label: 'Média' },
+  HIGH: { color: 'bg-red-100 text-red-700', label: 'Alta' },
+  CRITICAL: { color: 'bg-purple-100 text-purple-700', label: 'Crítica' }
 } as const;
 
 function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.open;
+  const config = STATUS_CONFIG[status.toUpperCase() as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.OPEN;
   return <Badge className={config.color}>{config.label}</Badge>;
 }
 
 function PriorityBadge({ priority }: { priority: string }) {
-  const config = PRIORITY_CONFIG[priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG.medium;
+  const config = PRIORITY_CONFIG[priority.toUpperCase() as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG.MEDIUM;
   return <Badge className={config.color}>{config.label}</Badge>;
 }
 
 export default function Support() {
+  const api = useApi();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [ticketForm, setTicketForm] = useState<TicketForm>(INITIAL_TICKET_FORM);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
+  const [faqs, setFaqs] = useState<IFAQ[]>([]);
+
+  // Load data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [ticketsData, faqsData] = await Promise.all([
+          api.support.findAllTickets(1, 10).catch(() => ({ data: [] })),
+          api.support.findAllFAQs(1, 20).catch(() => ({ data: [] }))
+        ]);
+        
+        setTickets(ticketsData.data || []);
+        setFaqs(faqsData.data || []);
+      } catch (error) {
+        // Silently handle errors to avoid flooding
+        console.warn('Error loading support data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [api.support]);
 
   const handleSubmitTicket = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await api.support.createTicket({
+        subject: ticketForm.subject,
+        description: ticketForm.description,
+        category: ticketForm.category as any,
+        priority: ticketForm.priority as any,
+      });
       
       toast({
         title: "Ticket criado com sucesso",
@@ -200,6 +113,10 @@ export default function Support() {
       });
       
       setTicketForm(INITIAL_TICKET_FORM);
+      
+      // Refresh tickets
+      const ticketsData = await api.support.findAllTickets(1, 10);
+      setTickets(ticketsData.data);
     } catch (error) {
       toast({
         title: "Erro ao criar ticket",
@@ -209,9 +126,9 @@ export default function Support() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [toast]);
+  }, [ticketForm, api.support, toast]);
 
-  const filteredFAQ = FAQ_DATA.filter(item => 
+  const filteredFAQ = faqs.filter(item => 
     item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.answer.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -369,30 +286,36 @@ export default function Support() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredFAQ.map((item) => (
-                <Card key={item.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-base text-slate-900">{item.question}</CardTitle>
-                        <CardDescription className="mt-2 text-slate-600">{item.answer}</CardDescription>
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Carregando FAQs...</p>
+            ) : filteredFAQ.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Nenhuma FAQ encontrada</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredFAQ.map((item) => (
+                  <Card key={item.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-base text-slate-900">{item.question}</CardTitle>
+                          <CardDescription className="mt-2 text-slate-600">{item.answer}</CardDescription>
+                        </div>
+                        <Badge variant="secondary">{item.category}</Badge>
                       </div>
-                      <Badge variant="secondary">{item.category}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-slate-500">
-                      <span>{item.views} visualizações</span>
-                      <Button variant="ghost" size="sm" className="hover:bg-purple-50">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Ver mais
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm text-slate-500">
+                        <span>{item.views} visualizações</span>
+                        <Button variant="ghost" size="sm" className="hover:bg-purple-50">
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          Ver mais
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="tickets" className="space-y-4">
@@ -410,7 +333,11 @@ export default function Support() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {TICKET_DATA.map((ticket) => (
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Carregando tickets...</p>
+                ) : tickets.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhum ticket encontrado</p>
+                ) : tickets.map((ticket) => (
                   <div key={ticket.id} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -420,9 +347,9 @@ export default function Support() {
                           <PriorityBadge priority={ticket.priority} />
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-slate-500">
-                          <span>ID: {ticket.id}</span>
+                          <span>ID: {ticket.id.substring(0, 8)}</span>
                           <span>Criado: {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}</span>
-                          <span>Responsável: {ticket.assignee}</span>
+                          <span>Responsável: {ticket.assignedTo || 'Não atribuído'}</span>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
@@ -444,7 +371,8 @@ export default function Support() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <p className="text-sm text-muted-foreground text-center py-8">Recursos em breve</p>
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {RESOURCES.map((resource, index) => (
                     <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="flex items-start justify-between mb-3">
@@ -470,7 +398,7 @@ export default function Support() {
                       </div>
                     </div>
                   ))}
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </TabsContent>
@@ -513,10 +441,10 @@ export default function Support() {
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="technical">Técnico</SelectItem>
-                            <SelectItem value="billing">Faturamento</SelectItem>
-                            <SelectItem value="feature">Funcionalidade</SelectItem>
-                            <SelectItem value="other">Outros</SelectItem>
+                            <SelectItem value="TECHNICAL">Técnico</SelectItem>
+                            <SelectItem value="BILLING">Faturamento</SelectItem>
+                            <SelectItem value="FEATURE">Funcionalidade</SelectItem>
+                            <SelectItem value="OTHER">Outros</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -531,9 +459,10 @@ export default function Support() {
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="low">Baixa</SelectItem>
-                            <SelectItem value="medium">Média</SelectItem>
-                            <SelectItem value="high">Alta</SelectItem>
+                            <SelectItem value="LOW">Baixa</SelectItem>
+                            <SelectItem value="MEDIUM">Média</SelectItem>
+                            <SelectItem value="HIGH">Alta</SelectItem>
+                            <SelectItem value="CRITICAL">Crítica</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

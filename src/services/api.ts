@@ -12,6 +12,9 @@ import { RolesService } from './clients/roles.service';
 import { ConversationService } from './clients/conversation.service';
 import { WhatsAppMessageService } from './clients/whatsapp-message.service';
 import { SalesService } from './clients/sales.service';
+import { FeedbackService } from './clients/feedback.service';
+import { SettingsService } from './clients/settings.service';
+import { SupportService } from './clients/support.service';
 import { notificationsClient } from './clients/notifications.client';
 import { clearAuthStorage, getToken } from '@/utils/storage';
 
@@ -78,6 +81,9 @@ export class ApiService {
     this.conversation = new ConversationService(api);
     this.whatsappMessage = new WhatsAppMessageService(api);
     this.sales = new SalesService(api);
+    this.feedback = new FeedbackService(api);
+    this.settings = new SettingsService(api);
+    this.support = new SupportService(api);
     this.notifications = notificationsClient(api);
 
     this.api = api;
@@ -96,5 +102,8 @@ export class ApiService {
   readonly conversation
   readonly whatsappMessage
   readonly sales
+  readonly feedback
+  readonly settings
+  readonly support
   readonly notifications
 }

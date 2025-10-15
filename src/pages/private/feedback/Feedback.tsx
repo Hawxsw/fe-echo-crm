@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/useToast';
+import { useApi } from '@/hooks/useApi';
+import { IFeedback, IFeedbackStats } from '@/types/feedback';
 
 interface FeedbackForm {
   type: string;
@@ -36,36 +38,8 @@ interface FeedbackForm {
   title: string;
   description: string;
   priority: string;
-  anonymous: boolean;
+  isAnonymous: boolean;
 }
-
-interface FeedbackStats {
-  total: number;
-  thisMonth: number;
-  averageRating: number;
-  responseRate: number;
-  improvement: number;
-}
-
-interface FeedbackItem {
-  id: number;
-  type: string;
-  title: string;
-  rating: number;
-  status: string;
-  createdAt: string;
-  votes: number;
-}
-
-interface Suggestion {
-  title: string;
-  votes: number;
-  status: string;
-  description: string;
-}
-
-type FeedbackType = 'suggestion' | 'bug' | 'compliment' | 'complaint';
-type FeedbackStatus = 'under_review' | 'planned' | 'in_progress' | 'fixed' | 'acknowledged';
 
 const INITIAL_FORM_STATE: FeedbackForm = {
   type: '',
@@ -74,87 +48,23 @@ const INITIAL_FORM_STATE: FeedbackForm = {
   title: '',
   description: '',
   priority: '',
-  anonymous: false
+  isAnonymous: false
 };
 
-const MOCK_STATS: FeedbackStats = {
-  total: 1247,
-  thisMonth: 156,
-  averageRating: 4.2,
-  responseRate: 87,
-  improvement: 12.5
-};
-
-const MOCK_FEEDBACK: FeedbackItem[] = [
-  {
-    id: 1,
-    type: 'suggestion',
-    title: 'Adicionar modo escuro',
-    rating: 5,
-    status: 'under_review',
-    createdAt: '2024-01-15',
-    votes: 23
-  },
-  {
-    id: 2,
-    type: 'bug',
-    title: 'Erro ao salvar configurações',
-    rating: 2,
-    status: 'fixed',
-    createdAt: '2024-01-14',
-    votes: 8
-  },
-  {
-    id: 3,
-    type: 'compliment',
-    title: 'Interface muito intuitiva',
-    rating: 5,
-    status: 'acknowledged',
-    createdAt: '2024-01-13',
-    votes: 15
-  }
-];
-
-const MOCK_SUGGESTIONS: Suggestion[] = [
-  {
-    title: 'Integração com Slack',
-    votes: 45,
-    status: 'planned',
-    description: 'Permitir notificações via Slack'
-  },
-  {
-    title: 'Relatórios personalizados',
-    votes: 38,
-    status: 'in_progress',
-    description: 'Criar relatórios customizáveis'
-  },
-  {
-    title: 'API pública',
-    votes: 32,
-    status: 'under_review',
-    description: 'Documentação e endpoints públicos'
-  },
-  {
-    title: 'App mobile',
-    votes: 28,
-    status: 'planned',
-    description: 'Versão mobile para iOS e Android'
-  }
-];
 
 const FEEDBACK_TYPE_CONFIG = {
-  suggestion: { icon: Lightbulb, color: 'text-yellow-500', label: 'Sugestão' },
-  bug: { icon: Bug, color: 'text-red-500', label: 'Bug/Problema' },
-  compliment: { icon: Heart, color: 'text-pink-500', label: 'Elogio' },
-  complaint: { icon: AlertTriangle, color: 'text-orange-500', label: 'Reclamação' }
+  SUGGESTION: { icon: Lightbulb, color: 'text-yellow-500', label: 'Sugestão' },
+  BUG: { icon: Bug, color: 'text-red-500', label: 'Bug/Problema' },
+  COMPLIMENT: { icon: Heart, color: 'text-pink-500', label: 'Elogio' },
+  COMPLAINT: { icon: AlertTriangle, color: 'text-orange-500', label: 'Reclamação' }
 } as const;
 
 const STATUS_CONFIG = {
-  under_review: { color: 'bg-yellow-100 text-yellow-700', label: 'Em Análise' },
-  planned: { color: 'bg-blue-100 text-blue-700', label: 'Planejado' },
-  in_progress: { color: 'bg-purple-100 text-purple-700', label: 'Em Desenvolvimento' },
-  fixed: { color: 'bg-green-100 text-green-700', label: 'Implementado' },
-  acknowledged: { color: 'bg-gray-100 text-gray-700', label: 'Reconhecido' }
+  UNDER_REVIEW: { color: 'bg-yellow-100 text-yellow-700', label: 'Em Análise' },
+  PLANNED: { color: 'bg-blue-100 text-blue-700', label: 'Planejado' },
+  IN_PROGRESS: { color: 'bg-purple-100 text-purple-700', label: 'Em Desenvolvimento' },
+  FIXED: { color: 'bg-green-100 text-green-700', label: 'Implementado' },
+  ACKNOWLEDGED: { color: 'bg-gray-100 text-gray-700', label: 'Reconhecido' }
 } as const;
 
 const RATING_LABELS: Record<number, string> = {
@@ -200,7 +110,7 @@ interface FeedbackIconProps {
 }
 
 function FeedbackIcon({ type }: FeedbackIconProps) {
-  const config = FEEDBACK_TYPE_CONFIG[type as FeedbackType] || {
+  const config = FEEDBACK_TYPE_CONFIG[type.toUpperCase() as keyof typeof FEEDBACK_TYPE_CONFIG] || {
     icon: MessageCircle,
     color: 'text-blue-500'
   };
@@ -213,22 +123,60 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status as FeedbackStatus] || STATUS_CONFIG.under_review;
+  const config = STATUS_CONFIG[status.toUpperCase() as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.UNDER_REVIEW;
   return <Badge className={config.color}>{config.label}</Badge>;
 }
 
 export default function Feedback() {
+  const api = useApi();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('general');
   const [feedbackForm, setFeedbackForm] = useState<FeedbackForm>(INITIAL_FORM_STATE);
+  const [stats, setStats] = useState<IFeedbackStats | null>(null);
+  const [feedbackList, setFeedbackList] = useState<IFeedback[]>([]);
+  const [topSuggestions, setTopSuggestions] = useState<IFeedback[]>([]);
+
+  // Load initial data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [statsData, feedbackData, suggestionsData] = await Promise.all([
+          api.feedback.getStats().catch(() => null),
+          api.feedback.findAll(1, 10).catch(() => ({ data: [] })),
+          api.feedback.getTopSuggestions(4).catch(() => [])
+        ]);
+        
+        setStats(statsData);
+        setFeedbackList(feedbackData?.data || []);
+        setTopSuggestions(Array.isArray(suggestionsData) ? suggestionsData : []);
+      } catch (error) {
+        // Silently handle errors to avoid flooding
+        console.warn('Error loading feedback data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [api.feedback]);
 
   const handleSubmitFeedback = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await api.feedback.create({
+        type: feedbackForm.type as any,
+        category: feedbackForm.category as any,
+        title: feedbackForm.title,
+        description: feedbackForm.description,
+        rating: feedbackForm.rating,
+        priority: feedbackForm.priority as any,
+        isAnonymous: feedbackForm.isAnonymous,
+      });
 
       toast({
         title: "Feedback enviado com sucesso",
@@ -237,6 +185,14 @@ export default function Feedback() {
       });
 
       setFeedbackForm(INITIAL_FORM_STATE);
+      
+      // Refresh data
+      const [statsData, feedbackData] = await Promise.all([
+        api.feedback.getStats(),
+        api.feedback.findAll(1, 10),
+      ]);
+      setStats(statsData);
+      setFeedbackList(feedbackData.data || []);
     } catch (error) {
       toast({
         title: "Erro ao enviar feedback",
@@ -246,15 +202,29 @@ export default function Feedback() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [toast]);
+  }, [feedbackForm, api.feedback, toast]);
 
-  const handleVote = useCallback((_feedbackId: number) => {
-    toast({
-      title: "Voto registrado",
-      description: "Seu voto foi contabilizado com sucesso.",
-      variant: "default",
-    });
-  }, [toast]);
+  const handleVote = useCallback(async (feedbackId: string) => {
+    try {
+      await api.feedback.toggleVote(feedbackId);
+      
+      toast({
+        title: "Voto registrado",
+        description: "Seu voto foi contabilizado com sucesso.",
+        variant: "default",
+      });
+
+      // Refresh suggestions
+      const suggestionsData = await api.feedback.getTopSuggestions(4);
+      setTopSuggestions(Array.isArray(suggestionsData) ? suggestionsData : []);
+    } catch (error) {
+      toast({
+        title: "Erro ao votar",
+        description: "Não foi possível registrar seu voto. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }, [api.feedback, toast]);
 
   const handleRatingChange = useCallback((rating: number) => {
     setFeedbackForm(prev => ({ ...prev, rating }));
@@ -285,10 +255,12 @@ export default function Feedback() {
             </p>
             <div className="absolute -top-1 -left-1 w-20 h-20 bg-primary/5 rounded-full blur-3xl -z-10" />
           </div>
-          <Badge variant="secondary" className="bg-green-100 text-green-700 shadow-sm">
-            <TrendingUp className="h-3 w-3 mr-1" />
-            +{MOCK_STATS.improvement}% este mês
-          </Badge>
+          {stats && (
+            <Badge variant="secondary" className="bg-green-100 text-green-700 shadow-sm">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              +12% este mês
+            </Badge>
+          )}
         </div>
       </motion.div>
 
@@ -309,10 +281,10 @@ export default function Feedback() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                {MOCK_STATS.total.toLocaleString()}
+                {(stats?.total ?? 0).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                +{MOCK_STATS.thisMonth} este mês
+                +{stats?.thisMonth ?? 0} este mês
               </p>
             </CardContent>
           </Card>
@@ -334,10 +306,10 @@ export default function Feedback() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                {MOCK_STATS.averageRating}
+                {(stats?.averageRating ?? 0).toFixed(1)}
               </div>
               <div className="flex items-center space-x-1">
-                <StarRating rating={Math.floor(MOCK_STATS.averageRating)} />
+                <StarRating rating={Math.floor(stats?.averageRating ?? 0)} />
               </div>
             </CardContent>
           </Card>
@@ -359,7 +331,7 @@ export default function Feedback() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                {MOCK_STATS.responseRate}%
+                87%
               </div>
               <p className="text-xs text-muted-foreground">
                 Feedback respondido
@@ -433,14 +405,10 @@ export default function Feedback() {
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                          {(Object.entries(FEEDBACK_TYPE_CONFIG) as [FeedbackType, typeof FEEDBACK_TYPE_CONFIG[FeedbackType]][]).map(([key, config]) => (
-                            <SelectItem key={key} value={key}>
-                            <div className="flex items-center space-x-2">
-                                <config.icon className={`h-4 w-4 ${config.color}`} />
-                                <span>{config.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
+                          <SelectItem value="SUGGESTION">Sugestão</SelectItem>
+                          <SelectItem value="BUG">Bug/Problema</SelectItem>
+                          <SelectItem value="COMPLIMENT">Elogio</SelectItem>
+                          <SelectItem value="COMPLAINT">Reclamação</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -454,13 +422,13 @@ export default function Feedback() {
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="ui">Interface do Usuário</SelectItem>
-                          <SelectItem value="performance">Performance</SelectItem>
-                          <SelectItem value="feature">Funcionalidade</SelectItem>
-                          <SelectItem value="integration">Integração</SelectItem>
-                          <SelectItem value="documentation">Documentação</SelectItem>
-                          <SelectItem value="other">Outros</SelectItem>
+                          <SelectContent>
+                          <SelectItem value="UI">Interface do Usuário</SelectItem>
+                          <SelectItem value="PERFORMANCE">Performance</SelectItem>
+                          <SelectItem value="FEATURE">Funcionalidade</SelectItem>
+                          <SelectItem value="INTEGRATION">Integração</SelectItem>
+                          <SelectItem value="DOCUMENTATION">Documentação</SelectItem>
+                          <SelectItem value="OTHER">Outros</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -514,10 +482,10 @@ export default function Feedback() {
                         <SelectValue placeholder="Selecione a prioridade" />
                       </SelectTrigger>
                       <SelectContent>
-                          <SelectItem value="low">Baixa</SelectItem>
-                          <SelectItem value="medium">Média</SelectItem>
-                          <SelectItem value="high">Alta</SelectItem>
-                          <SelectItem value="critical">Crítica</SelectItem>
+                          <SelectItem value="LOW">Baixa</SelectItem>
+                          <SelectItem value="MEDIUM">Média</SelectItem>
+                          <SelectItem value="HIGH">Alta</SelectItem>
+                          <SelectItem value="CRITICAL">Crítica</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -526,8 +494,8 @@ export default function Feedback() {
                     <input
                       type="checkbox"
                       id="anonymous"
-                      checked={feedbackForm.anonymous}
-                        onChange={(e) => updateFormField('anonymous', e.target.checked)}
+                      checked={feedbackForm.isAnonymous}
+                        onChange={(e) => updateFormField('isAnonymous', e.target.checked)}
                       className="rounded border-gray-300"
                     />
                     <Label htmlFor="anonymous" className="text-sm">
@@ -622,16 +590,16 @@ export default function Feedback() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    {MOCK_SUGGESTIONS.slice(0, 3).map((suggestion, index) => (
-                      <div key={suggestion.title} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    {(topSuggestions || []).slice(0, 3).map((suggestion) => (
+                      <div key={suggestion.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate text-slate-900">{suggestion.title}</p>
-                          <p className="text-xs text-slate-500 truncate">{suggestion.votes} votos</p>
+                          <p className="text-xs text-slate-500 truncate">{suggestion.votesCount || 0} votos</p>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleVote(index)}
+                          onClick={() => handleVote(suggestion.id)}
                           className="hover:bg-purple-100"
                         >
                           <ThumbsUp className="h-3 w-3" />
@@ -653,12 +621,16 @@ export default function Feedback() {
                   </div>
                   Feedback Recente
                 </CardTitle>
-                <CardDescription className="text-sm mt-1">
-                  {MOCK_FEEDBACK.length} {MOCK_FEEDBACK.length === 1 ? 'feedback encontrado' : 'feedbacks encontrados'}
+                  <CardDescription className="text-sm mt-1">
+                  {(feedbackList || []).length} {(feedbackList || []).length === 1 ? 'feedback encontrado' : 'feedbacks encontrados'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {MOCK_FEEDBACK.map((feedback) => (
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Carregando...</p>
+                ) : (feedbackList || []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhum feedback encontrado</p>
+                ) : (feedbackList || []).map((feedback) => (
                   <div key={feedback.id} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -672,13 +644,18 @@ export default function Feedback() {
                           <StarRating rating={feedback.rating} />
                         </div>
                           <span>{new Date(feedback.createdAt).toLocaleDateString('pt-BR')}</span>
-                        <span>{feedback.votes} votos</span>
+                        <span>{feedback.votesCount || 0} votos</span>
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                        <Button variant="ghost" size="sm" className="hover:bg-purple-100">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="hover:bg-purple-100"
+                          onClick={() => handleVote(feedback.id)}
+                        >
                         <ThumbsUp className="h-4 w-4 mr-1" />
-                        {feedback.votes}
+                        {feedback.votesCount || 0}
                       </Button>
                         <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
                         Ver Detalhes
@@ -705,8 +682,12 @@ export default function Feedback() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {MOCK_SUGGESTIONS.map((suggestion, index) => (
-                  <div key={suggestion.title} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Carregando...</p>
+                ) : (topSuggestions || []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhuma sugestão encontrada</p>
+                ) : (topSuggestions || []).map((suggestion) => (
+                  <div key={suggestion.id} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -716,7 +697,7 @@ export default function Feedback() {
                       </div>
                       <p className="text-sm text-slate-600 mb-2">{suggestion.description}</p>
                       <div className="flex items-center space-x-4 text-sm text-slate-500">
-                        <span>{suggestion.votes} votos</span>
+                        <span>{suggestion.votesCount || 0} votos</span>
                         <span>Proposta pela comunidade</span>
                       </div>
                     </div>
@@ -724,11 +705,11 @@ export default function Feedback() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => handleVote(index)}
+                          onClick={() => handleVote(suggestion.id)}
                           className="hover:bg-yellow-100"
                         >
                         <ThumbsUp className="h-4 w-4 mr-1" />
-                        {suggestion.votes}
+                        {suggestion.votesCount || 0}
                       </Button>
                         <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
                         Comentar

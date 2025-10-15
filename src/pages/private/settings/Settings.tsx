@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -17,69 +17,57 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/useToast';
-
-interface NotificationSettings {
-  email: boolean;
-  push: boolean;
-  sms: boolean;
-  marketing: boolean;
-}
-
-interface SecuritySettings {
-  twoFactor: boolean;
-  sessionTimeout: string;
-  passwordPolicy: string;
-}
-
-interface AppearanceSettings {
-  theme: string;
-  language: string;
-  timezone: string;
-}
-
-interface SystemSettings {
-  autoSave: boolean;
-  dataRetention: string;
-  backupFrequency: string;
-}
-
-const DEFAULT_NOTIFICATIONS: NotificationSettings = {
-  email: true,
-  push: false,
-  sms: false,
-  marketing: false,
-};
-
-const DEFAULT_SECURITY: SecuritySettings = {
-  twoFactor: false,
-  sessionTimeout: '30',
-  passwordPolicy: 'medium',
-};
-
-const DEFAULT_APPEARANCE: AppearanceSettings = {
-  theme: 'light',
-  language: 'pt-BR',
-  timezone: 'America/Sao_Paulo',
-};
-
-const DEFAULT_SYSTEM: SystemSettings = {
-  autoSave: true,
-  dataRetention: '365',
-  backupFrequency: 'daily',
-};
+import { useApi } from '@/hooks/useApi';
+import { ISettings } from '@/types/settings';
 
 export default function Settings() {
+  const api = useApi();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationSettings>(DEFAULT_NOTIFICATIONS);
-  const [security, setSecurity] = useState<SecuritySettings>(DEFAULT_SECURITY);
-  const [appearance, setAppearance] = useState<AppearanceSettings>(DEFAULT_APPEARANCE);
-  const [system, setSystem] = useState<SystemSettings>(DEFAULT_SYSTEM);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [settings, setSettings] = useState<ISettings | null>(null);
+
+  // Load settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        setIsLoading(true);
+        const data = await api.settings.getSettings().catch(() => null);
+        setSettings(data);
+      } catch (error) {
+        // Silently handle errors to avoid flooding
+        console.warn('Error loading settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, [api.settings]);
 
   const handleSave = useCallback(async () => {
-    setIsLoading(true);
+    if (!settings) return;
+
+    setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const updatedSettings = await api.settings.updateSettings({
+        emailNotifications: settings.emailNotifications,
+        pushNotifications: settings.pushNotifications,
+        smsNotifications: settings.smsNotifications,
+        marketingNotifications: settings.marketingNotifications,
+        twoFactorAuth: settings.twoFactorAuth,
+        sessionTimeout: settings.sessionTimeout,
+        passwordPolicy: settings.passwordPolicy as any,
+        theme: settings.theme as any,
+        language: settings.language as any,
+        timezone: settings.timezone,
+        autoSave: settings.autoSave,
+        dataRetention: settings.dataRetention,
+        backupFrequency: settings.backupFrequency as any,
+      });
+
+      setSettings(updatedSettings);
+      
       toast({
         title: "Configurações salvas",
         description: "Suas configurações foram atualizadas com sucesso.",
@@ -92,22 +80,34 @@ export default function Settings() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
-  }, [toast]);
+  }, [settings, api.settings, toast]);
 
-  const handleReset = useCallback(() => {
-    setNotifications(DEFAULT_NOTIFICATIONS);
-    setSecurity(DEFAULT_SECURITY);
-    setAppearance(DEFAULT_APPEARANCE);
-    setSystem(DEFAULT_SYSTEM);
-    
-    toast({
-      title: "Configurações restauradas",
-      description: "As configurações foram restauradas para os valores padrão.",
-      variant: "default",
-    });
-  }, [toast]);
+  const handleReset = useCallback(async () => {
+    try {
+      const defaultSettings = await api.settings.resetSettings();
+      setSettings(defaultSettings);
+      
+      toast({
+        title: "Configurações restauradas",
+        description: "As configurações foram restauradas para os valores padrão.",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao restaurar",
+        description: "Não foi possível restaurar as configurações.",
+        variant: "destructive",
+      });
+    }
+  }, [api.settings, toast]);
+
+  const updateSetting = useCallback(<K extends keyof ISettings>(key: K, value: ISettings[K]) => {
+    if (settings) {
+      setSettings({ ...settings, [key]: value });
+    }
+  }, [settings]);
 
   return (
     <div className="space-y-8 pb-8">
@@ -143,10 +143,10 @@ export default function Settings() {
             </Button>
             <Button 
               onClick={handleSave} 
-              disabled={isLoading}
+              disabled={isSaving || isLoading}
               className="shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              {isLoading ? (
+              {isSaving ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Save className="h-4 w-4 mr-2" />
@@ -183,8 +183,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="email-notifications"
-                  checked={notifications.email}
-                  onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, email: checked }))}
+                  checked={settings?.emailNotifications || false}
+                  onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
+                  disabled={isLoading}
                 />
               </div>
               
@@ -195,8 +196,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="push-notifications"
-                  checked={notifications.push}
-                  onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, push: checked }))}
+                  checked={settings?.pushNotifications || false}
+                  onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -207,8 +209,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="sms-notifications"
-                  checked={notifications.sms}
-                  onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, sms: checked }))}
+                  checked={settings?.smsNotifications || false}
+                  onCheckedChange={(checked) => updateSetting('smsNotifications', checked)}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -219,8 +222,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="marketing-notifications"
-                  checked={notifications.marketing}
-                  onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, marketing: checked }))}
+                  checked={settings?.marketingNotifications || false}
+                  onCheckedChange={(checked) => updateSetting('marketingNotifications', checked)}
+                  disabled={isLoading}
                 />
               </div>
             </CardContent>
@@ -252,16 +256,18 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="two-factor"
-                  checked={security.twoFactor}
-                  onCheckedChange={(checked) => setSecurity(prev => ({ ...prev, twoFactor: checked }))}
+                  checked={settings?.twoFactorAuth || false}
+                  onCheckedChange={(checked) => updateSetting('twoFactorAuth', checked)}
+                  disabled={isLoading}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="session-timeout" className="font-medium text-slate-900">Timeout da Sessão (minutos)</Label>
                 <Select
-                  value={security.sessionTimeout}
-                  onValueChange={(value) => setSecurity(prev => ({ ...prev, sessionTimeout: value }))}
+                  value={(settings?.sessionTimeout ?? 30).toString()}
+                  onValueChange={(value) => updateSetting('sessionTimeout', parseInt(value))}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -278,8 +284,9 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label htmlFor="password-policy" className="font-medium text-slate-900">Política de Senha</Label>
                 <Select
-                  value={security.passwordPolicy}
-                  onValueChange={(value) => setSecurity(prev => ({ ...prev, passwordPolicy: value }))}
+                  value={settings?.passwordPolicy || 'medium'}
+                  onValueChange={(value) => updateSetting('passwordPolicy', value)}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -317,8 +324,9 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label htmlFor="theme" className="font-medium text-slate-900">Tema</Label>
                 <Select
-                  value={appearance.theme}
-                  onValueChange={(value) => setAppearance(prev => ({ ...prev, theme: value }))}
+                  value={settings?.theme || 'light'}
+                  onValueChange={(value) => updateSetting('theme', value)}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -334,8 +342,9 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label htmlFor="language" className="font-medium text-slate-900">Idioma</Label>
                 <Select
-                  value={appearance.language}
-                  onValueChange={(value) => setAppearance(prev => ({ ...prev, language: value }))}
+                  value={settings?.language || 'pt-BR'}
+                  onValueChange={(value) => updateSetting('language', value)}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -351,8 +360,9 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label htmlFor="timezone" className="font-medium text-slate-900">Fuso Horário</Label>
                 <Select
-                  value={appearance.timezone}
-                  onValueChange={(value) => setAppearance(prev => ({ ...prev, timezone: value }))}
+                  value={settings?.timezone || 'America/Sao_Paulo'}
+                  onValueChange={(value) => updateSetting('timezone', value)}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -394,16 +404,18 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="auto-save"
-                  checked={system.autoSave}
-                  onCheckedChange={(checked) => setSystem(prev => ({ ...prev, autoSave: checked }))}
+                  checked={settings?.autoSave || false}
+                  onCheckedChange={(checked) => updateSetting('autoSave', checked)}
+                  disabled={isLoading}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="data-retention" className="font-medium text-slate-900">Retenção de Dados (dias)</Label>
                 <Select
-                  value={system.dataRetention}
-                  onValueChange={(value) => setSystem(prev => ({ ...prev, dataRetention: value }))}
+                  value={(settings?.dataRetention ?? 365).toString()}
+                  onValueChange={(value) => updateSetting('dataRetention', parseInt(value))}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -421,8 +433,9 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label htmlFor="backup-frequency" className="font-medium text-slate-900">Frequência de Backup</Label>
                 <Select
-                  value={system.backupFrequency}
-                  onValueChange={(value) => setSystem(prev => ({ ...prev, backupFrequency: value }))}
+                  value={settings?.backupFrequency || 'daily'}
+                  onValueChange={(value) => updateSetting('backupFrequency', value)}
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
