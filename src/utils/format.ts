@@ -1,17 +1,7 @@
-/**
- * Utilitários de formatação para melhorar legibilidade do código.
- */
-
-/**
- * Formata um nome completo de forma consistente
- */
 export function formatFullName(firstName: string, lastName: string): string {
   return `${firstName} ${lastName}`.trim();
 }
 
-/**
- * Formata um telefone brasileiro
- */
 export function formatPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
   
@@ -24,9 +14,6 @@ export function formatPhone(phone: string): string {
   return phone;
 }
 
-/**
- * Formata uma data para exibição
- */
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   
@@ -37,9 +24,6 @@ export function formatDate(date: string | Date): string {
   });
 }
 
-/**
- * Formata uma data com hora para exibição
- */
 export function formatDateTime(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   
@@ -52,9 +36,6 @@ export function formatDateTime(date: string | Date): string {
   });
 }
 
-/**
- * Retorna tempo relativo (ex: "há 2 horas")
- */
 export function getRelativeTime(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
@@ -88,17 +69,11 @@ export function getRelativeTime(date: string | Date): string {
   return `há ${diffInMonths} ${diffInMonths === 1 ? 'mês' : 'meses'}`;
 }
 
-/**
- * Trunca texto longo adicionando reticências
- */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}...`;
 }
 
-/**
- * Formata iniciais de um nome (ex: "João Silva" => "JS")
- */
 export function getInitials(name: string): string {
   return name
     .split(' ')
@@ -107,4 +82,3 @@ export function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
-

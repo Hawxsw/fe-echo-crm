@@ -1,4 +1,3 @@
-// Feedback Types
 export type FeedbackType = 'SUGGESTION' | 'BUG' | 'COMPLIMENT' | 'COMPLAINT';
 export type FeedbackCategory = 'UI' | 'PERFORMANCE' | 'FEATURE' | 'INTEGRATION' | 'DOCUMENTATION' | 'OTHER';
 export type FeedbackPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -58,4 +57,3 @@ export interface IVoteResponse {
   votesCount: number;
   hasVoted: boolean;
 }
-

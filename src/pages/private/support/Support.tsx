@@ -71,7 +71,6 @@ export default function Support() {
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [faqs, setFaqs] = useState<IFAQ[]>([]);
 
-  // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -84,7 +83,6 @@ export default function Support() {
         setTickets(ticketsData.data || []);
         setFaqs(faqsData.data || []);
       } catch (error) {
-        // Silently handle errors to avoid flooding
         console.warn('Error loading support data:', error);
       } finally {
         setIsLoading(false);
@@ -114,7 +112,6 @@ export default function Support() {
       
       setTicketForm(INITIAL_TICKET_FORM);
       
-      // Refresh tickets
       const ticketsData = await api.support.findAllTickets(1, 10);
       setTickets(ticketsData.data);
     } catch (error) {
@@ -372,33 +369,6 @@ export default function Support() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground text-center py-8">Recursos em breve</p>
-                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {RESOURCES.map((resource, index) => (
-                    <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            {resource.type === 'PDF' && <FileText className="h-4 w-4 text-red-500" />}
-                            {resource.type === 'Vídeo' && <Video className="h-4 w-4 text-blue-500" />}
-                            {resource.type === 'HTML' && <Globe className="h-4 w-4 text-green-500" />}
-                            <h4 className="font-semibold text-slate-900">{resource.title}</h4>
-                          </div>
-                          <p className="text-sm text-slate-600">{resource.description}</p>
-                        </div>
-                        <Badge variant="secondary">{resource.type}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-500">
-                          {resource.size} • {resource.downloads} downloads
-                        </span>
-                        <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all">
-                          <Download className="h-4 w-4 mr-1" />
-                          Baixar
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div> */}
               </CardContent>
             </Card>
           </TabsContent>

@@ -7,15 +7,11 @@ import { UserLayout } from './layouts/UserLayout';
 import { routes } from './helpers';
 import { dashboardRoutes, IRouteConfig } from './config/routes.config';
 
-
 import Landing from '@/pages/public/Landing';
 import Login from '@/pages/public/Login';
 import Register from '@/pages/public/Register';
 import Profile from '@/pages/private/Profile';
 
-/**
- * Componente de loading para Suspense
- */
 const RouteLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -23,9 +19,6 @@ const RouteLoader = () => (
   </div>
 );
 
-/**
- * Renderiza rotas de forma recursiva com suporte a lazy loading e permissões
- */
 function renderRoute(route: IRouteConfig, parentPath = '') {
   const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path;
 
@@ -55,44 +48,28 @@ function renderRoute(route: IRouteConfig, parentPath = '') {
   return <Route key={fullPath} path={route.path} element={route.element} />;
 }
 
-/**
- * Router principal da aplicação - versão refatorada.
- * 
- * Melhorias:
- * - Rotas definidas em arquivo de configuração separado
- * - Lazy loading automático de páginas
- * - Renderização recursiva de rotas
- * - Separação de responsabilidades
- * - Mais fácil de testar e manter
- */
 export const Router = () => {
   return (
     <BrowserRouter>
       <Suspense fallback={<RouteLoader />}>
         <Routes>
-          {/* Public routes */}
           <Route path={routes.home.path} element={<Landing />} />
           <Route path={routes.login.path} element={<Login />} />
           <Route path={routes.register.path} element={<Register />} />
 
-          {/* Private routes */}
           <Route element={<PrivateRoute />}>
-            {/* User Layout - rotas para usuários comuns */}
             <Route element={<UserLayout />}>
               <Route path={routes.profile.path} element={<Profile />} />
             </Route>
 
-            {/* Dashboard Layout - rotas administrativas */}
             <Route path={routes.dashboard.path} element={<DashboardLayout />}>
               {dashboardRoutes.map((route) => renderRoute(route))}
             </Route>
           </Route>
 
-          {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to={routes.home.path} replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
   );
 };
-

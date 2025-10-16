@@ -1,7 +1,6 @@
 import { lazy } from 'react';
 import { PERMISSIONS } from '@/constants/permissions';
 
-
 const Dashboard = lazy(() => import('@/pages/private/Dashboard'));
 const OrganizationalStructure = lazy(() => import('@/pages/private/OrganizationalStructure'));
 const DepartmentsList = lazy(() => import('@/pages/private/departments/DepartmentsList'));
@@ -20,15 +19,6 @@ const Settings = lazy(() => import('@/pages/private/settings/Settings'));
 const Reports = lazy(() => import('@/pages/private/reports/Reports'));
 const Support = lazy(() => import('@/pages/private/support/Support'));
 const Feedback = lazy(() => import('@/pages/private/feedback/Feedback'));
-
-/**
- * Configuração de rotas da aplicação.
- * 
- * Separação de responsabilidades:
- * - Este arquivo define apenas a estrutura de rotas e suas permissões
- * - O componente Router monta as rotas baseado nesta configuração
- * - Facilita manutenção e testes
- */
 
 export interface IRouteConfig {
   path: string;
@@ -186,4 +176,3 @@ export const dashboardRoutes: IRouteConfig[] = [
     element: <Feedback />,
   },
 ];
-

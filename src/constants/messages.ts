@@ -1,14 +1,4 @@
-/**
- * Mensagens padronizadas da aplicação.
- * 
- * Centraliza mensagens para facilitar:
- * - Manutenção
- * - Internacionalização futura (i18n)
- * - Consistência
- */
-
 export const MESSAGES = {
-
   SUCCESS: {
     DEPARTMENT_CREATED: 'Departamento criado com sucesso!',
     DEPARTMENT_UPDATED: 'Departamento atualizado com sucesso!',
@@ -20,7 +10,6 @@ export const MESSAGES = {
     LOGOUT_SUCCESS: 'Logout realizado com sucesso!',
     SAVED: 'Salvo com sucesso!',
   },
-
 
   ERROR: {
     GENERIC: 'Ocorreu um erro inesperado',
@@ -38,7 +27,6 @@ export const MESSAGES = {
     NETWORK: 'Erro de conexão. Verifique sua internet.',
   },
 
-
   CONFIRM: {
     DELETE_DEPARTMENT: (name: string) =>
       `Tem certeza que deseja excluir o departamento "${name}"?`,
@@ -49,7 +37,6 @@ export const MESSAGES = {
     UNSAVED_CHANGES: 'Você tem alterações não salvas. Deseja sair mesmo assim?',
   },
 
-
   INFO: {
     NO_DEPARTMENTS: 'Nenhum departamento encontrado',
     NO_USERS: 'Nenhum usuário encontrado',
@@ -58,4 +45,3 @@ export const MESSAGES = {
     EMPTY_STATE: 'Não há dados para exibir',
   },
 } as const;
-

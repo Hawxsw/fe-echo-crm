@@ -1,9 +1,7 @@
-// Support Types
 export type TicketCategory = 'TECHNICAL' | 'BILLING' | 'FEATURE' | 'OTHER';
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
 
-// Ticket Types
 export interface ICreateTicket {
   subject: string;
   description: string;
@@ -40,7 +38,6 @@ export interface ITicketListResponse {
   limit: number;
 }
 
-// FAQ Types
 export interface ICreateFAQ {
   question: string;
   answer: string;
@@ -79,4 +76,3 @@ export interface IFAQListResponse {
 export interface IFAQCategories {
   categories: string[];
 }
-

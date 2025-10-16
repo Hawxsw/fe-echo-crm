@@ -58,7 +58,6 @@ export default function DepartmentsList() {
     });
 
   const handleDelete = async (id: string, name: string) => {
-
     if (window.confirm(`Tem certeza que deseja excluir o departamento "${name}"?`)) {
       try {
         await deleteDepartment(id);
@@ -70,7 +69,6 @@ export default function DepartmentsList() {
 
   return (
     <div className="space-y-8 pb-8">
-      {/* Modern Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -103,7 +101,6 @@ export default function DepartmentsList() {
         </div>
       </motion.div>
 
-      {/* Stats Badges */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -130,7 +127,6 @@ export default function DepartmentsList() {
         </div>
       </motion.div>
 
-      {/* Modern Search and Controls */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -140,7 +136,6 @@ export default function DepartmentsList() {
         <Card className="border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4 items-center">
-              {/* Search */}
               <div className="relative flex-1 w-full">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
@@ -151,7 +146,6 @@ export default function DepartmentsList() {
                 />
               </div>
               
-              {/* Sort */}
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 <select
@@ -165,7 +159,6 @@ export default function DepartmentsList() {
                 </select>
               </div>
               
-              {/* View Toggle */}
               <div className="flex items-center bg-muted rounded-xl p-1">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -189,7 +182,6 @@ export default function DepartmentsList() {
         </Card>
       </motion.div>
 
-      {/* Error message */}
       {error && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -204,7 +196,6 @@ export default function DepartmentsList() {
         </motion.div>
       )}
 
-      {/* Departments list */}
       {loading ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -243,7 +234,6 @@ export default function DepartmentsList() {
                   }}
                 ></div>
                 
-                {/* Background pattern */}
                 <div className="absolute inset-0 opacity-5">
                   <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-500"></div>
                   <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-blue-500"></div>
@@ -251,7 +241,6 @@ export default function DepartmentsList() {
 
                 {viewMode === 'grid' ? (
                   <div className="relative z-10">
-                    {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
                         <div
@@ -284,14 +273,12 @@ export default function DepartmentsList() {
                       </div>
                     </div>
 
-                    {/* Description */}
                     {department.description && (
                       <p className="text-slate-600 mb-6 line-clamp-3 leading-relaxed">
                         {department.description}
                       </p>
                     )}
 
-                    {/* Stats */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-xl">
@@ -308,7 +295,6 @@ export default function DepartmentsList() {
                         </div>
                       </div>
                       
-                      {/* Actions */}
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="sm"
@@ -336,7 +322,6 @@ export default function DepartmentsList() {
                     </div>
                   </div>
                 ) : (
-                  /* List View */
                   <div className="relative z-10 flex items-center w-full">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg mr-4 flex-shrink-0"
@@ -405,7 +390,6 @@ export default function DepartmentsList() {
           </div>
         )}
 
-      {/* Empty State */}
       {!loading && filteredDepartments.length === 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}

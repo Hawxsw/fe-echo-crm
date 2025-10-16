@@ -19,15 +19,6 @@ interface AppProvidersProps {
   children: ReactNode;
 }
 
-/**
- * Componente que centraliza todos os providers da aplicação.
- * 
- * Benefícios:
- * - Remove o "Provider Hell" do main.tsx
- * - Facilita a manutenção e visualização dos providers
- * - Permite reorganizar a ordem dos providers facilmente
- * - Melhora a legibilidade do código
- */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ApiProvider>
@@ -59,4 +50,3 @@ export function AppProviders({ children }: AppProvidersProps) {
     </ApiProvider>
   );
 }
-

@@ -27,7 +27,6 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState<ISettings | null>(null);
 
-  // Load settings on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -35,7 +34,6 @@ export default function Settings() {
         const data = await api.settings.getSettings().catch(() => null);
         setSettings(data);
       } catch (error) {
-        // Silently handle errors to avoid flooding
         console.warn('Error loading settings:', error);
       } finally {
         setIsLoading(false);

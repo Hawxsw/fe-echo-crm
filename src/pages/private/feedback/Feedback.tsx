@@ -138,7 +138,6 @@ export default function Feedback() {
   const [feedbackList, setFeedbackList] = useState<IFeedback[]>([]);
   const [topSuggestions, setTopSuggestions] = useState<IFeedback[]>([]);
 
-  // Load initial data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -153,7 +152,6 @@ export default function Feedback() {
         setFeedbackList(feedbackData?.data || []);
         setTopSuggestions(Array.isArray(suggestionsData) ? suggestionsData : []);
       } catch (error) {
-        // Silently handle errors to avoid flooding
         console.warn('Error loading feedback data:', error);
       } finally {
         setIsLoading(false);
@@ -186,7 +184,6 @@ export default function Feedback() {
 
       setFeedbackForm(INITIAL_FORM_STATE);
       
-      // Refresh data
       const [statsData, feedbackData] = await Promise.all([
         api.feedback.getStats(),
         api.feedback.findAll(1, 10),
@@ -214,7 +211,6 @@ export default function Feedback() {
         variant: "default",
       });
 
-      // Refresh suggestions
       const suggestionsData = await api.feedback.getTopSuggestions(4);
       setTopSuggestions(Array.isArray(suggestionsData) ? suggestionsData : []);
     } catch (error) {

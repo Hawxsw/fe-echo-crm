@@ -10,26 +10,6 @@ interface UseAsyncOperationOptions {
   showErrorToast?: boolean;
 }
 
-/**
- * Hook genérico para operações assíncronas com tratamento de erro padronizado.
- * 
- * Elimina duplicação de código try/catch em todos os hooks.
- * 
- * @example
- * ```tsx
- * const { execute, loading, error } = useAsyncOperation();
- * 
- * const handleSubmit = async (data) => {
- *   await execute(
- *     () => api.department.create(data),
- *     {
- *       successMessage: 'Departamento criado!',
- *       onSuccess: () => navigate('/departments')
- *     }
- *   );
- * };
- * ```
- */
 export function useAsyncOperation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,4 +63,3 @@ export function useAsyncOperation() {
     reset,
   };
 }
-

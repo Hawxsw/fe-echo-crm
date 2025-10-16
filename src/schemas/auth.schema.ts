@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Schema de validação para login
- */
 export const loginSchema = z.object({
   email: z
     .string({
@@ -16,9 +13,6 @@ export const loginSchema = z.object({
     .min(6, { message: 'A senha deve ter no mínimo 6 caracteres.' }),
 });
 
-/**
- * Schema de validação para registro
- */
 export const registerSchema = z.object({
   email: z
     .string({
@@ -50,7 +44,5 @@ export const registerSchema = z.object({
   roleId: z.string().uuid({ message: 'ID do role inválido.' }).optional(),
 });
 
-
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type RegisterSchema = z.infer<typeof registerSchema>;
-

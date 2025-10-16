@@ -1,43 +1,22 @@
-/**
- * Validadores customizados para uso geral.
- * 
- * Complementam as validações do Zod para casos específicos.
- */
-
-/**
- * Valida se uma string é um email válido
- */
 export function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
-/**
- * Valida se uma string é um UUID válido
- */
 export function isValidUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
 
-/**
- * Valida se uma string é um telefone brasileiro válido
- */
 export function isValidBRPhone(phone: string): boolean {
   const cleaned = phone.replace(/\D/g, '');
   return cleaned.length === 10 || cleaned.length === 11;
 }
 
-/**
- * Valida se uma string está vazia ou contém apenas espaços
- */
 export function isEmpty(value: string): boolean {
   return !value || value.trim().length === 0;
 }
 
-/**
- * Valida força de senha
- */
 export function validatePasswordStrength(password: string): {
   isStrong: boolean;
   score: number;
@@ -82,4 +61,3 @@ export function validatePasswordStrength(password: string): {
     feedback,
   };
 }
-

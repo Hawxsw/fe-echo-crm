@@ -1,5 +1,5 @@
 import { BarChart3, Users, MessageSquare, LayoutGrid, Sparkles } from 'lucide-react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useState, useRef, MouseEvent } from 'react';
 
 export default function CRMVisualization3D() {
@@ -11,9 +11,6 @@ export default function CRMVisualization3D() {
   
   const rotateX = useSpring(mouseY, { stiffness: 150, damping: 30 });
   const rotateY = useSpring(mouseX, { stiffness: 150, damping: 30 });
-  
-  // Adiciona profundidade baseada na posição do mouse
-  const depth = useTransform(mouseX, [-30, 30], [-50, 50]);
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;

@@ -1,17 +1,8 @@
-/**
- * Utilitário para construção de paths dinâmicos.
- * 
- * Melhora a legibilidade e previne erros em rotas dinâmicas.
- */
-
 interface IRouteInterface {
   path: string;
   routes?: Record<string, IRouteInterface>;
 }
 
-/**
- * Cria rotas com paths completos de forma recursiva
- */
 export const createRoutes = <T extends Record<string, IRouteInterface>>(
   routes: T,
   parentPath = '',
@@ -29,16 +20,6 @@ export const createRoutes = <T extends Record<string, IRouteInterface>>(
   }, {} as T);
 };
 
-/**
- * Gera um path substituindo parâmetros dinâmicos
- * 
- * @example
- * ```ts
- * generatePath('/users/:id', { id: '123' }) // => '/users/123'
- * generatePath('/posts/:id/comments/:commentId', { id: '1', commentId: '2' }) 
- * // => '/posts/1/comments/2'
- * ```
- */
 export const generatePath = (path: string, params: Record<string, string>) => {
   return Object.entries(params).reduce(
     (updatedPath, [key, value]) => updatedPath.replace(`:${key}`, value),
@@ -46,9 +27,6 @@ export const generatePath = (path: string, params: Record<string, string>) => {
   );
 };
 
-/**
- * Definição das rotas da aplicação com type-safety
- */
 export const routes = createRoutes({
   home: { path: '/' },
   login: { path: '/login' },
@@ -103,4 +81,3 @@ export const routes = createRoutes({
     path: '/profile',
   },
 });
-
