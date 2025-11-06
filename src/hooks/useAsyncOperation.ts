@@ -1,9 +1,18 @@
 import { useState, useCallback } from 'react';
-import { handleApiError } from '@/utils/error-handler';
+import { handleApiError, handleApiSuccess } from '@/utils/error-handler';
 
-interface UseAsyncOperationOptions {
-  onSuccess?: (data?: any) => void;
-  onError?: (error: any) => void;
+interface ErrorWithResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
+interface UseAsyncOperationOptions<T> {
+  onSuccess?: (data?: T) => void;
+  onError?: (error: unknown) => void;
   successMessage?: string;
   errorMessage?: string;
   showSuccessToast?: boolean;
@@ -17,7 +26,7 @@ export function useAsyncOperation() {
   const execute = useCallback(
     async <T,>(
       operation: () => Promise<T>,
-      options?: UseAsyncOperationOptions
+      options?: UseAsyncOperationOptions<T>
     ): Promise<T | null> => {
       try {
         setLoading(true);
@@ -26,15 +35,20 @@ export function useAsyncOperation() {
         const result = await operation();
         
         if (options?.successMessage && options?.showSuccessToast !== false) {
-          const { handleApiSuccess } = await import('@/utils/error-handler');
           handleApiSuccess(options.successMessage);
         }
         
         options?.onSuccess?.(result);
         
         return result;
-      } catch (err: any) {
-        const errorMessage = err.response?.data?.message || options?.errorMessage || 'Erro ao executar operação';
+      } catch (err: unknown) {
+        const errorWithResponse = err as ErrorWithResponse;
+        const errorMessage = 
+          errorWithResponse.response?.data?.message || 
+          errorWithResponse.message || 
+          options?.errorMessage || 
+          'Erro ao executar operação';
+        
         setError(errorMessage);
         
         if (options?.showErrorToast !== false) {

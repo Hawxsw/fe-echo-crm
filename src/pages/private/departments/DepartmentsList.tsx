@@ -226,7 +226,6 @@ export default function DepartmentsList() {
                 }}
                 onClick={() => navigate(`/dashboard/departments/${department.id}`)}
               >
-                {/* Gradient overlay */}
                 <div 
                   className="absolute top-0 left-0 w-full h-1 opacity-80"
                   style={{ 

@@ -25,16 +25,16 @@ export class ChatService {
   }
 
   public async sendMessage(chatId: string, content: string): Promise<IMessage> {
-    console.log('📤 ChatService - sendMessage:', { chatId, content });
     try {
       const response = await this.api.post<IMessage>('/chat/messages', {
         chatId,
         content,
       });
-      console.log('✅ ChatService - resposta sendMessage:', response.data);
       return response.data;
     } catch (error) {
-      console.error('💥 ChatService - erro sendMessage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ChatService - erro sendMessage:', error);
+      }
       throw error;
     }
   }

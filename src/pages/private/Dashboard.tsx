@@ -187,7 +187,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-8">
-      {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -208,7 +207,6 @@ export default function Dashboard() {
         <div className="absolute -top-1 -left-1 w-20 h-20 bg-primary/5 rounded-full blur-3xl -z-10" />
       </motion.div>
 
-      {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {statsCards.map((stat, index) => (
           <motion.div
@@ -282,7 +280,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Content Grid */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -418,7 +415,6 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* Quick Stats Row */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -501,7 +497,6 @@ export default function Dashboard() {
         </motion.div>
       </motion.div>
 
-      {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

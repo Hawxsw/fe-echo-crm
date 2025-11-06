@@ -36,6 +36,9 @@ import {
 } from 'lucide-react';
 import { DraggableCard } from './DraggableCard';
 import { IColumn, ICreateCard, CardPriority } from '@/types/kanban';
+import { useUsers } from '@/hooks/useUsers';
+import { IUser } from '@/types/user';
+import { useState, useEffect } from 'react';
 
 interface DroppableColumnProps {
   column: IColumn;
@@ -63,6 +66,26 @@ export const DroppableColumn = ({
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const { getAllUsers } = useUsers();
+
+  useEffect(() => {
+    if (showDialog) {
+      getAllUsers().then((usersData) => {
+        let usersArray: IUser[] = [];
+        if (Array.isArray(usersData)) {
+          usersArray = usersData;
+        } else if (usersData && typeof usersData === 'object' && 'data' in usersData && Array.isArray((usersData as any).data)) {
+          usersArray = (usersData as any).data;
+        }
+        setUsers(usersArray);
+      }).catch((error) => {
+        console.error('Erro ao carregar usuários:', error);
+        setUsers([]);
+      });
+    }
+  }, [showDialog, getAllUsers]);
 
   const handleCreateCard = () => {
     if (!cardForm.title.trim()) return;
@@ -74,7 +97,9 @@ export const DroppableColumn = ({
       position: 0,
       priority: 'MEDIUM',
       tags: [],
+      assignedToId: undefined,
     });
+    setShowDialog(false);
   };
 
   const cardIds = column.cards?.map(card => card.id) || [];
@@ -104,7 +129,7 @@ export const DroppableColumn = ({
             </span>
           </div>
           <div className="flex items-center gap-0.5">
-            <Dialog>
+            <Dialog open={showDialog} onOpenChange={setShowDialog}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100 rounded-lg transition-colors">
                   <Plus className="w-4 h-4 text-slate-600" />
@@ -156,10 +181,30 @@ export const DroppableColumn = ({
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label htmlFor="cardAssignedTo" className="text-sm font-semibold text-slate-700">Responsável</Label>
+                    <Select
+                      value={cardForm.assignedToId || 'none'}
+                      onValueChange={(value) => setCardForm({ ...cardForm, assignedToId: value === 'none' ? undefined : value })}
+                    >
+                      <SelectTrigger className="mt-1.5 rounded-xl border-slate-300">
+                        <SelectValue placeholder="Selecione um responsável" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="none" className="rounded-lg">Nenhum</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id} className="rounded-lg">
+                            {user.firstName} {user.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <DialogFooter className="gap-2">
                   <Button variant="outline" onClick={() => {
                     setCardForm({ title: '', description: '', position: 0, priority: 'MEDIUM', tags: [] });
+                    setShowDialog(false);
                   }} className="rounded-xl">
                     Cancelar
                   </Button>

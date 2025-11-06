@@ -197,7 +197,6 @@ export default function OrganizationalStructure() {
           </div>
         </motion.div>
         
-        {/* Skeleton Stats Grid */}
         <div className="grid gap-6 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <motion.div
@@ -220,7 +219,6 @@ export default function OrganizationalStructure() {
           ))}
         </div>
         
-        {/* Skeleton Main Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

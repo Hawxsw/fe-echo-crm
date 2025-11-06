@@ -42,9 +42,8 @@ export default function CRMVisualization3D() {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={handleMouseLeave}
-      style={{ perspective: '1200px' }} // Aumentado de 1000px
+      style={{ perspective: '1200px' }}
     >
-      {/* Efeito de brilho de fundo */}
       <motion.div
         className="absolute inset-0 bg-gradient-radial from-blue-200/30 via-transparent to-transparent"
         animate={{
@@ -67,7 +66,6 @@ export default function CRMVisualization3D() {
           willChange: 'transform',
         }}
       >
-        {/* Card Analytics - Melhorado */}
         <motion.div
           className="absolute top-8 left-8 w-48 h-32 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-4 border border-gray-200/50"
           initial={{ rotateY: -30, rotateX: 10, z: -100 }}
@@ -119,7 +117,6 @@ export default function CRMVisualization3D() {
           </div>
         </motion.div>
 
-        {/* Card Clientes - Melhorado */}
         <motion.div
           className="absolute top-24 right-12 w-52 h-36 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-4 border border-gray-200/50"
           initial={{ rotateY: 30, rotateX: -10, z: 50 }}
@@ -169,7 +166,6 @@ export default function CRMVisualization3D() {
           </div>
         </motion.div>
 
-        {/* Card WhatsApp - Melhorado */}
         <motion.div
           className="absolute bottom-20 left-16 w-56 h-40 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-4 border border-gray-200/50"
           initial={{ rotateY: -20, rotateX: 15, z: 100 }}
@@ -223,7 +219,6 @@ export default function CRMVisualization3D() {
           </div>
         </motion.div>
 
-        {/* Card Kanban - Melhorado */}
         <motion.div
           className="absolute bottom-12 right-8 w-48 h-32 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-4 border border-gray-200/50"
           initial={{ rotateY: 25, rotateX: -15, z: 0 }}
@@ -279,7 +274,6 @@ export default function CRMVisualization3D() {
           </div>
         </motion.div>
 
-        {/* Card Central - Dashboard CRM - MUITO Melhorado */}
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-48 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-xl shadow-2xl p-5 text-white overflow-hidden"
           initial={{ rotateY: 0, rotateX: 0, scale: 1, z: 200 }}
@@ -302,7 +296,6 @@ export default function CRMVisualization3D() {
             transition: { duration: 0.2 } 
           }}
         >
-          {/* Efeito de brilho animado no fundo */}
           <motion.div
             className="absolute -top-20 -right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"
             animate={{
@@ -362,7 +355,6 @@ export default function CRMVisualization3D() {
         </motion.div>
       </motion.div>
 
-      {/* Tooltip - Melhorado */}
       {!isHovering && (
         <motion.div
           className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md px-5 py-2.5 rounded-full shadow-xl border border-gray-200/50"

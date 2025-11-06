@@ -165,7 +165,6 @@ export const ChatSidebar = ({
         <div className="flex-1 min-w-0 text-left">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              {/* {chat.isPinned && <Pin className="h-3 w-3 text-muted-foreground" />} */}
               <span className={cn(
                 'text-sm font-medium truncate',
                 unreadCount > 0 && 'text-foreground font-semibold'

@@ -1,10 +1,11 @@
 import { Menu, Bell, Search, ChevronDown } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { useNotifications } from '../../hooks/useNotifications';
-import { Avatar } from '../ui/avatar';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Avatar } from '@/components/ui/avatar';
 import { NotificationDropdown } from './NotificationDropdown';
 import { UserDropdownMenu } from './UserDropdownMenu';
+import { UI_CONSTANTS } from '@/constants/ui';
 
 export const HeaderMenu = () => {
   const { currentUser, logout } = useAuth();
@@ -14,22 +15,43 @@ export const HeaderMenu = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLButtonElement>(null);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error during logout:', error);
+      }
     }
-  };
+  }, [logout]);
+
+  const handleToggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleToggleNotification = useCallback(() => {
+    setIsNotificationOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleCloseNotification = useCallback(() => {
+    setIsNotificationOpen(false);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setIsMenuOpen(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+
+      if (notificationRef.current && !notificationRef.current.contains(target)) {
         const dropdown = document.querySelector('[data-notification-dropdown]');
-        if (dropdown && !dropdown.contains(event.target as Node)) {
+        if (dropdown && !dropdown.contains(target)) {
           setIsNotificationOpen(false);
         }
       }
@@ -39,6 +61,24 @@ export const HeaderMenu = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const userInitials = useMemo(() => {
+    if (!currentUser) return '';
+    const first = currentUser.firstName?.charAt(0) || '';
+    const last = currentUser.lastName?.charAt(0) || '';
+    return `${first}${last}`;
+  }, [currentUser]);
+
+  const userFullName = useMemo(() => {
+    if (!currentUser) return '';
+    return `${currentUser.firstName} ${currentUser.lastName}`;
+  }, [currentUser]);
+
+  const notificationBadgeCount = useMemo(() => {
+    return unreadCount > 99 ? '99+' : unreadCount;
+  }, [unreadCount]);
+
+  const hasUnreadNotifications = useMemo(() => unreadCount > 0, [unreadCount]);
+
   return (
     <header className="relative z-50 flex-shrink-0 h-16 bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm flex">
       <div className="flex-1 flex justify-between items-center px-4 sm:px-6">
@@ -46,9 +86,9 @@ export const HeaderMenu = () => {
           <button
             type="button"
             className="inline-flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={handleToggleMenu}
           >
-            <span className="sr-only">Abrir menu</span>
+            <span className="sr-only">{UI_CONSTANTS.HEADER.MENU_OPEN}</span>
             <Menu className="h-5 w-5" />
           </button>
         </div>
@@ -61,7 +101,7 @@ export const HeaderMenu = () => {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition-all"
-              placeholder="Buscar..."
+              placeholder={UI_CONSTANTS.HEADER.SEARCH_PLACEHOLDER}
             />
           </div>
         </div>
@@ -71,7 +111,7 @@ export const HeaderMenu = () => {
             <button
               ref={notificationRef}
               type="button"
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              onClick={handleToggleNotification}
               className={`
                 relative p-2 rounded-lg transition-all
                 ${isNotificationOpen 
@@ -79,14 +119,14 @@ export const HeaderMenu = () => {
                   : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
                 }
               `}
-              title="Notificações"
+              title={UI_CONSTANTS.HEADER.NOTIFICATIONS_TITLE}
             >
               <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
+              {hasUnreadNotifications && (
                 <>
                   <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-white">
-                    {unreadCount > 99 ? '99+' : unreadCount}
+                    {notificationBadgeCount}
                   </span>
                 </>
               )}
@@ -95,7 +135,7 @@ export const HeaderMenu = () => {
             <div data-notification-dropdown>
               <NotificationDropdown 
                 isOpen={isNotificationOpen}
-                onClose={() => setIsNotificationOpen(false)}
+                onClose={handleCloseNotification}
                 anchorRef={notificationRef as React.RefObject<HTMLButtonElement>}
               />
             </div>
@@ -105,25 +145,24 @@ export const HeaderMenu = () => {
             <button
               type="button"
               className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={handleToggleMenu}
             >
               <Avatar className="h-9 w-9 ring-2 ring-white shadow-md">
                 {currentUser?.avatar ? (
                   <img 
                     src={currentUser.avatar} 
-                    alt={`${currentUser.firstName} ${currentUser.lastName}`}
+                    alt={userFullName}
                     className="h-full w-full rounded-full object-cover"
                   />
                 ) : (
                   <div className="h-full w-full rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
-                    {currentUser?.firstName?.charAt(0)}
-                    {currentUser?.lastName?.charAt(0)}
+                    {userInitials}
                   </div>
                 )}
               </Avatar>
               <div className="hidden md:block text-left">
                 <p className="text-sm font-semibold text-slate-700 leading-tight">
-                  {currentUser?.firstName} {currentUser?.lastName}
+                  {userFullName}
                 </p>
                 <p className="text-xs text-slate-500">{currentUser?.email}</p>
               </div>
@@ -134,7 +173,7 @@ export const HeaderMenu = () => {
 
             <UserDropdownMenu
               isOpen={isMenuOpen}
-              onClose={() => setIsMenuOpen(false)}
+              onClose={handleCloseMenu}
               currentUser={currentUser}
               onLogout={handleLogout}
             />

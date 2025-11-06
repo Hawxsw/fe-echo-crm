@@ -1,0 +1,35 @@
+export const UI_CONSTANTS = {
+  CARD_EDITOR: {
+    TITLE_CREATE: 'Novo Card',
+    TITLE_EDIT: 'Editar Card',
+    DESCRIPTION_CREATE: 'Crie um novo card para esta coluna',
+    DESCRIPTION_EDIT: 'Edite as informações do card',
+    LABEL_TITLE: 'Título *',
+    LABEL_DESCRIPTION: 'Descrição',
+    LABEL_PRIORITY: 'Prioridade',
+    LABEL_ASSIGNED_TO: 'Responsável',
+    PLACEHOLDER_TITLE: 'Digite o título do card',
+    PLACEHOLDER_DESCRIPTION: 'Descreva os detalhes do card...',
+    PLACEHOLDER_ASSIGNED_TO: 'Selecione um responsável',
+    BUTTON_CANCEL: 'Cancelar',
+    BUTTON_CREATE: 'Criar Card',
+    BUTTON_SAVE: 'Salvar Alterações',
+    PRIORITY_LOW: '🟢 Baixa',
+    PRIORITY_MEDIUM: '🔵 Média',
+    PRIORITY_HIGH: '🟠 Alta',
+    PRIORITY_URGENT: '🔴 Urgente',
+    NONE: 'Nenhum',
+  },
+  HEADER: {
+    SEARCH_PLACEHOLDER: 'Buscar...',
+    NOTIFICATIONS_TITLE: 'Notificações',
+    MENU_OPEN: 'Abrir menu',
+  },
+  PRIORITY: {
+    LOW: 'LOW',
+    MEDIUM: 'MEDIUM',
+    HIGH: 'HIGH',
+    URGENT: 'URGENT',
+  },
+} as const;
+

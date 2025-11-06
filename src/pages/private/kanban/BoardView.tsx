@@ -202,6 +202,7 @@ export default function BoardView() {
         position: 0,
         priority: 'MEDIUM',
         tags: [],
+        assignedToId: undefined,
       });
       toast.success('Card criado com sucesso!');
       loadBoard();
@@ -217,13 +218,14 @@ export default function BoardView() {
     setShowCardEditor(true);
   };
 
-  const handleSaveCard = async (data: { title: string; description: string; priority: string }) => {
+  const handleSaveCard = async (data: { title: string; description: string; priority: string; assignedToId?: string }) => {
     try {
       if (cardEditorMode === 'edit' && editingCard) {
         await updateCard(editingCard.id, {
           title: data.title,
           description: data.description,
           priority: data.priority as any,
+          assignedToId: data.assignedToId,
         });
         toast.success('Card atualizado com sucesso!');
       } else {
@@ -405,7 +407,6 @@ export default function BoardView() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -467,7 +468,6 @@ export default function BoardView() {
         </Card>
       </motion.div>
 
-      {/* Kanban Board */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -492,7 +492,6 @@ export default function BoardView() {
               />
             ))}
 
-            {/* Empty state quando não há colunas */}
             {(!board.columns || board.columns.length === 0) && (
               <Card className="bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg shadow-slate-200/30 w-full rounded-2xl">
                 <CardContent className="text-center py-20">
@@ -549,7 +548,6 @@ export default function BoardView() {
         </DragOverlay>
       </DndContext>
 
-      {/* Column Editor */}
       <ColumnEditor
         column={editingColumn}
         isOpen={showColumnEditor}
@@ -561,7 +559,6 @@ export default function BoardView() {
         mode={columnEditorMode}
       />
 
-      {/* Card Editor */}
       <CardEditor
         card={editingCard}
         isOpen={showCardEditor}
@@ -573,7 +570,6 @@ export default function BoardView() {
         mode={cardEditorMode}
       />
 
-      {/* Delete Column Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteConfirm}
         onClose={() => {
@@ -602,7 +598,6 @@ export default function BoardView() {
         isLoading={isDeleting}
       />
 
-      {/* Delete Card Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showCardDeleteConfirm}
         onClose={() => {

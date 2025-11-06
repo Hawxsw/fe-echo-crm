@@ -69,6 +69,8 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
       await markAsRead([notification.id]);
     }
     
+    await deleteNotification(notification.id);
+    
     if (notification.actionUrl) {
       try {
         navigate(notification.actionUrl);
@@ -119,9 +121,9 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
             <div className="flex items-center space-x-2">
               <Bell className="h-5 w-5" />
               <h3 className="text-lg font-semibold">Notificações</h3>
-              {unreadCount > 0 && (
+              {notifications.length > 0 && (
                 <span className="px-2 py-0.5 text-xs font-bold bg-white/20 rounded-full">
-                  {unreadCount}
+                  {notifications.length}
                 </span>
               )}
               {!isConnected && (
@@ -208,7 +210,9 @@ export const NotificationDropdown = ({ isOpen, onClose }: NotificationDropdownPr
                         </button>
                       </div>
                       <p className="text-sm text-slate-600 mt-0.5 line-clamp-2">
-                        {notification.message}
+                        {notification.metadata?.messageText 
+                          ? notification.metadata.messageText
+                          : notification.message}
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center space-x-3">

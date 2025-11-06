@@ -381,7 +381,6 @@ export default function InternalChat() {
 
   return (
     <div className="h-screen flex overflow-hidden bg-background">
-      {/* Sidebar */}
       <div className={cn(
         'w-80 flex-shrink-0 border-r border-border',
         'md:block',
@@ -407,7 +406,6 @@ export default function InternalChat() {
         )}
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <AnimatePresence mode="wait">
           {currentChat ? (
@@ -418,7 +416,6 @@ export default function InternalChat() {
               exit={{ opacity: 0 }}
               className="h-full flex flex-col"
             >
-              {/* Header */}
               <ChatHeader
                 chat={currentChat}
                 onClose={() => setCurrentChatId(null)}
@@ -451,9 +448,7 @@ export default function InternalChat() {
                 replyTo={replyTo}
                 onCancelReply={() => setReplyTo(null)}
                 chatName={currentChat ? getChatDisplayName(currentChat, currentUserId) : undefined}
-                onTyping={(isTyping) => {
-                  console.log('User is typing:', isTyping);
-                }}
+                onTyping={() => {}}
               />
             </motion.div>
           ) : (

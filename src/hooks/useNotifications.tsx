@@ -28,7 +28,11 @@ export const useNotifications = () => {
     try {
       setIsLoading(true);
       const data = await apiService.notifications.getAll();
-      setNotifications(Array.isArray(data) ? data : []);
+      const notificationsArray = Array.isArray(data) ? data : [];
+      const uniqueNotifications = notificationsArray.filter((notification, index, self) =>
+        index === self.findIndex(n => n.id === notification.id)
+      );
+      setNotifications(uniqueNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       setNotifications([]);
@@ -109,13 +113,11 @@ export const useNotifications = () => {
       socketRef.current = socket;
 
       socket.on('connect', () => {
-        console.log('✅ Notificações WebSocket conectado');
         setIsConnected(true);
         socket.emit('joinNotifications', currentUser.id);
       });
 
       socket.on('disconnect', () => {
-        console.log('❌ Notificações WebSocket desconectado');
         setIsConnected(false);
       });
 
@@ -125,12 +127,20 @@ export const useNotifications = () => {
       });
 
       socket.on('newNotification', (notification: INotification) => {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications(prev => {
+          const exists = prev.some(n => n.id === notification.id);
+          if (exists) {
+            return prev;
+          }
+          return [notification, ...prev];
+        });
         setUnreadCount(prev => prev + 1);
         
         if (Notification.permission === 'granted') {
+          const messageBody = notification.metadata?.messageText 
+            ?? notification.message;
           new Notification(notification.title, {
-            body: notification.message,
+            body: messageBody,
             icon: '/vite.svg',
             badge: '/vite.svg',
           });

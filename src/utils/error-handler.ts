@@ -26,12 +26,25 @@ const getValidationErrorMessage = (errors: ApiError['errors']): string => {
   return `${firstError.field}: ${firstError.message}`;
 };
 
-const getErrorMessage = (error: any, defaultMessage: string): string => {
-  if (!error?.response?.data) {
-    return error?.message || defaultMessage;
+interface ErrorResponse {
+  response?: {
+    data?: ApiError;
+  };
+  message?: string;
+}
+
+const getErrorMessage = (error: unknown, defaultMessage: string): string => {
+  if (!error || typeof error !== 'object') {
+    return defaultMessage;
   }
 
-  const apiError: ApiError = error.response.data;
+  const errorResponse = error as ErrorResponse;
+
+  if (!errorResponse.response?.data) {
+    return errorResponse.message || defaultMessage;
+  }
+
+  const apiError: ApiError = errorResponse.response.data;
   
   if (apiError.errorCode === 'VALIDATION_ERROR' && apiError.errors) {
     return getValidationErrorMessage(apiError.errors);
@@ -44,7 +57,7 @@ const getErrorMessage = (error: any, defaultMessage: string): string => {
   return ERROR_MESSAGES[apiError.statusCode] || defaultMessage;
 };
 
-export const handleApiError = (error: any, defaultMessage = 'Ocorreu um erro inesperado') => {
+export const handleApiError = (error: unknown, defaultMessage = 'Ocorreu um erro inesperado'): string => {
   const message = getErrorMessage(error, defaultMessage);
   toast.error(message);
   return message;
